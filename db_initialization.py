@@ -3,6 +3,7 @@ import mysql.connector
 
 db_name = "sadna_project"
 
+
 # This code creates connection to MySql, and creates new data base for project
 mydb = mysql.connector.connect(
   option_files='my.conf'
