@@ -6,7 +6,7 @@ def create_tables(cursor):
 
     cursor.execute("""
     CREATE TABLE countries( 
-    country_code INT PRIMARY KEY, 
+    country_code VARCHAR(10) PRIMARY KEY, 
     full_name VARCHAR(40) NOT NULL 
     )""")
 
