@@ -9,24 +9,6 @@ def create_tables(cursor):
     cursor.execute(f"""CREATE DATABASE {db_name}""")
     cursor.execute(f"USE {db_name}")
 
-    cursor.execute("""
-    CREATE TABLE countries( 
-    country_code VARCHAR(10) PRIMARY KEY, 
-    full_name VARCHAR(40) NOT NULL 
-    )""")
-
-    cursor.execute("""
-    CREATE TABLE feature_classes( 
-    feature_class VARCHAR(10) PRIMARY KEY, 
-    full_name VARCHAR(120) NOT NULL 
-    )""")
-
-    cursor.execute("""
-    CREATE TABLE feature_codes( 
-    feature_code VARCHAR(10) PRIMARY KEY, 
-    full_name VARCHAR(120) NOT NULL, 
-    feature_class VARCHAR(10) NOT NULL 
-    )""")
 
     cursor.execute("""
     CREATE TABLE locations (
