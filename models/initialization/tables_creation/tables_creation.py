@@ -4,7 +4,7 @@ db_name = "sadna_project"
 def create_tables(cursor):
     #TODO change the following line
     cursor.execute("""
-    DROP DATABASE IF EXISTS `sadna_project`; 
+    DROP DATABASE IF EXISTS `sadna`; 
     """)
     cursor.execute(f"""CREATE DATABASE {db_name}""")
     cursor.execute(f"USE {db_name}")
