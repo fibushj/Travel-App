@@ -1,5 +1,13 @@
 def populate_tables(cursor):
-    return None
+    cursor.execute("""
+    LOAD DATA INFILE 'd:\Jonathan\Software\Projects\DB-Project\data\small.csv'
+    INTO TABLE sadna_project.locations
+    FIELDS TERMINATED BY ',' ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 ROWS
+    (id, latitude);
+    """
+    )
 
 
 

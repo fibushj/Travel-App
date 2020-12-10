@@ -9,7 +9,7 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor()
 create_tables(cursor)
-populate_tables(cursor)
+#populate_tables(cursor)
 
 mydb.close()
 

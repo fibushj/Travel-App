@@ -1,19 +1,30 @@
 db_name = "sadna_project"
 
+
 def create_tables(cursor):
+    #TODO change the following line
+    cursor.execute("""
+    DROP DATABASE IF EXISTS `sadna_project`; 
+    """)
     cursor.execute(f"""CREATE DATABASE {db_name}""")
     cursor.execute(f"USE {db_name}")
     cursor.execute("""
     CREATE TABLE locations (
-        id INT PRIMARY KEY, 
-        full_name VARCHAR(120) NOT NULL, 
-        latitude DOUBLE NOT NULL, 
-        longtitude DOUBLE NOT NULL, 
-        feature_code VARCHAR(10) NOT NULL, 
-        country_code VARCHAR(10) NOT NULL, 
-        elevation INT 
+        geonameid INT PRIMARY KEY, 
+        coordinates POINT NOT NULL
     )"""
-    )
+                   )
+    # cursor.execute("""
+    # CREATE TABLE locations (
+    #     id INT PRIMARY KEY, 
+    #     full_name VARCHAR(120) NOT NULL, 
+    #     latitude DOUBLE NOT NULL, 
+    #     longtitude DOUBLE NOT NULL, 
+    #     feature_code VARCHAR(10), 
+    #     country_code VARCHAR(10) NOT NULL, 
+    #     elevation INT 
+    # )"""
+    #                )
     cursor.execute("""
     CREATE TABLE feature_codes( 
     feature_code VARCHAR(10) PRIMARY KEY, 
@@ -46,4 +57,4 @@ def create_tables(cursor):
     anonymous_review TINYINT, 
     review TINYTEXT, 
     PRIMARY KEY (user_id, place_id, trip_season)
-    )""")    
+    )""")
