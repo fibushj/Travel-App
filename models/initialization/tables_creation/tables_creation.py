@@ -11,40 +11,6 @@ def create_tables(cursor):
 
 
     cursor.execute("""
-    CREATE TABLE locations (
-        geonameid INT PRIMARY KEY, 
-        coordinates POINT NOT NULL
-    )"""
-                   )
-    # cursor.execute("""
-    # CREATE TABLE locations (
-    #     id INT PRIMARY KEY, 
-    #     full_name VARCHAR(120) NOT NULL, 
-    #     latitude DOUBLE NOT NULL, 
-    #     longtitude DOUBLE NOT NULL, 
-    #     feature_code VARCHAR(10), 
-    #     country_code VARCHAR(10) NOT NULL, 
-    #     elevation INT 
-    # )"""
-    #                )
-    cursor.execute("""
-    CREATE TABLE feature_codes( 
-    feature_code VARCHAR(10) PRIMARY KEY, 
-    full_name VARCHAR(120) NOT NULL, 
-    feature_class VARCHAR(10) NOT NULL 
-    )""")
-    cursor.execute("""
-    CREATE TABLE feature_classes( 
-    feature_class VARCHAR(10) PRIMARY KEY, 
-    full_name VARCHAR(120) NOT NULL 
-    )""")
-    cursor.execute("""
-    CREATE TABLE countries( 
-    country_code INT PRIMARY KEY, 
-    full_name VARCHAR(40) NOT NULL 
-    )""")
-
-    cursor.execute("""
     CREATE TABLE users( 
     id INT AUTO_INCREMENT PRIMARY KEY, 
     full_name VARCHAR(80) NOT NULL, 
