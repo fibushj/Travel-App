@@ -74,6 +74,19 @@ def create_radius_search_tab(left_frame):
     radius_slider = Scale(radius_frame, from_=0, to=1000, orient=HORIZONTAL)
     radius_slider.pack(expand=True, fill=X)
 
+    f_class_frame = Frame(radius_search_tab, bg=left_frame_bg, bd=3)
+    f_class_frame.pack(expand=True, fill=X)
+    f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=left_frame_bg).pack(expand=True, fill=X)
+    f_class_list_items = ["country, state, region...", "stream, lake...", "parks,area..."]
+    f_class_filter_list = create_filter_list(f_class_frame, f_class_list_items)
+
+    f_code_frame = Frame(radius_search_tab, bg=left_frame_bg, bd=3)
+    f_code_frame.pack(expand=True, fill=X)
+    f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=left_frame_bg).pack(expand=True, fill=X)
+    f_code_list_items = ["Will change according to the feature class"]
+    f_code_filter_list = create_filter_list(f_code_frame, f_code_list_items)
+
+
     radius_submit_button = Button(radius_search_tab, text="Search", width=20, command=lambda: None)
     radius_submit_button.pack(expand=True)
 
