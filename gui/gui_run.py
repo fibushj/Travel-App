@@ -1,3 +1,5 @@
+#todo: refactor!
+
 from tkinter import *
 from tkinter import ttk
 
@@ -25,7 +27,7 @@ def create_filter_list(frame, source):
 # Create first tab in left frame- search by feature tab
 def create_f_search_tab(left_frame):
     f_search_tab = Frame(left_frame, bg=left_frame_bg, bd=3)
-    left_tabs_control.add(f_search_tab, text='Search By Feature')
+    left_tabs_control.add(f_search_tab, text='Search By Country')
 
     country_frame = Frame(f_search_tab, bg=left_frame_bg, bd=3)
     country_frame.pack(expand=True, fill=X)
@@ -49,6 +51,20 @@ def create_f_search_tab(left_frame):
     f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=left_frame_bg).pack(expand=True, fill=X)
     f_code_list_items = ["Will change according to the feature class"]
     f_code_filter_list = create_filter_list(f_code_frame, f_code_list_items)
+
+    trip_frame = Frame(f_search_tab, bg=left_frame_bg, bd=3)
+    trip_frame.pack(expand=True, fill=X)
+    trip_type_val = StringVar()
+    trip_season_val = StringVar()
+    trip_type_options = ["Family", "Couples", "Solo"]
+    trip_season_options = ["Spring", "Summer", "Fall", "Winter"]
+    trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *trip_type_options)
+    trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *trip_season_options)
+    trip_type_dropmenu.config(width=15)
+    trip_season_dropmenu.config(width=15)
+    trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
+    trip_season_dropmenu.pack(side="right", padx=3, expand=True, fill=X)
+    # trip_type_dropmenu.bind("<Return>", print_something)
 
     f_submit_button = Button(f_search_tab, text="Search", width=20, command=lambda: None)
     f_submit_button.pack(expand=True)
@@ -86,6 +102,19 @@ def create_radius_search_tab(left_frame):
     f_code_list_items = ["Will change according to the feature class"]
     f_code_filter_list = create_filter_list(f_code_frame, f_code_list_items)
 
+    trip_frame = Frame(radius_search_tab, bg=left_frame_bg, bd=3)
+    trip_frame.pack(expand=True, fill=X)
+    trip_type_val = StringVar()
+    trip_season_val = StringVar()
+    trip_type_options = ["Family", "Couples", "Solo"]
+    trip_season_options = ["Spring", "Summer", "Fall", "Winter"]
+    trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *trip_type_options)
+    trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *trip_season_options)
+    trip_type_dropmenu.config(width=15)
+    trip_season_dropmenu.config(width=15)
+    trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
+    trip_season_dropmenu.pack(side="right", padx=3, expand=True, fill=X)
+    # trip_type_dropmenu.bind("<Return>", print_something)
 
     radius_submit_button = Button(radius_search_tab, text="Search", width=20, command=lambda: None)
     radius_submit_button.pack(expand=True)
