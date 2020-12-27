@@ -1,0 +1,5 @@
+around_the_world
+C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/small.csv
+C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/ISO 3166.csv
+C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/feature_classes.csv
+C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/feature_codes.csv
