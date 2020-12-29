@@ -1,4 +1,4 @@
-#todo: refactor!
+# todo: refactor!
 
 from tkinter import *
 from tkinter import ttk
@@ -11,7 +11,7 @@ WIDTH = "1366"
 
 def create_filter_list(frame, source):
     filter_list = MyFilterList(frame, source=source, display_rule=lambda item: item,
-                                       filter_rule=lambda item, text: item.lower().startswith(text.lower()))
+                               filter_rule=lambda item, text: text.lower() in item.lower())
     filter_list.pack(expand=True, fill=X)
 
     def show_result(event=None):
@@ -22,6 +22,23 @@ def create_filter_list(frame, source):
     filter_list.bind("<Return>", show_result)
     filter_list.bind("<Double-Button-1>", show_result)
     return filter_list
+
+
+# Create second tab in left frame- search by radius tab
+def create_trip_filter(frame):
+    trip_frame = Frame(frame, bg=left_frame_bg, bd=3)
+    trip_frame.pack(expand=True, fill=X)
+    trip_type_val = StringVar()
+    trip_season_val = StringVar()
+    trip_type_options = ["Family", "Couples", "Solo"]
+    trip_season_options = ["Spring", "Summer", "Fall", "Winter"]
+    trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *trip_type_options)
+    trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *trip_season_options)
+    trip_type_dropmenu.config(width=15)
+    trip_season_dropmenu.config(width=15)
+    trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
+    trip_season_dropmenu.pack(side="right", padx=3, expand=True, fill=X)
+    # trip_type_dropmenu.bind("<Return>", print_something)
 
 
 # Create first tab in left frame- search by feature tab
@@ -52,24 +69,12 @@ def create_f_search_tab(left_frame):
     f_code_list_items = ["Will change according to the feature class"]
     f_code_filter_list = create_filter_list(f_code_frame, f_code_list_items)
 
-    trip_frame = Frame(f_search_tab, bg=left_frame_bg, bd=3)
-    trip_frame.pack(expand=True, fill=X)
-    trip_type_val = StringVar()
-    trip_season_val = StringVar()
-    trip_type_options = ["Family", "Couples", "Solo"]
-    trip_season_options = ["Spring", "Summer", "Fall", "Winter"]
-    trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *trip_type_options)
-    trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *trip_season_options)
-    trip_type_dropmenu.config(width=15)
-    trip_season_dropmenu.config(width=15)
-    trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
-    trip_season_dropmenu.pack(side="right", padx=3, expand=True, fill=X)
-    # trip_type_dropmenu.bind("<Return>", print_something)
+    trip_filter = create_trip_filter(f_search_tab)
 
     f_submit_button = Button(f_search_tab, text="Search", width=20, command=lambda: None)
     f_submit_button.pack(expand=True)
 
-#Create second tab in left frame- search by radius tab
+
 def create_radius_search_tab(left_frame):
     radius_search_tab = Frame(left_frame, bg=left_frame_bg, bd=3)
     left_tabs_control.add(radius_search_tab, text='Search By Radius')
@@ -102,19 +107,7 @@ def create_radius_search_tab(left_frame):
     f_code_list_items = ["Will change according to the feature class"]
     f_code_filter_list = create_filter_list(f_code_frame, f_code_list_items)
 
-    trip_frame = Frame(radius_search_tab, bg=left_frame_bg, bd=3)
-    trip_frame.pack(expand=True, fill=X)
-    trip_type_val = StringVar()
-    trip_season_val = StringVar()
-    trip_type_options = ["Family", "Couples", "Solo"]
-    trip_season_options = ["Spring", "Summer", "Fall", "Winter"]
-    trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *trip_type_options)
-    trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *trip_season_options)
-    trip_type_dropmenu.config(width=15)
-    trip_season_dropmenu.config(width=15)
-    trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
-    trip_season_dropmenu.pack(side="right", padx=3, expand=True, fill=X)
-    # trip_type_dropmenu.bind("<Return>", print_something)
+    trip_filter = create_trip_filter(radius_search_tab)
 
     radius_submit_button = Button(radius_search_tab, text="Search", width=20, command=lambda: None)
     radius_submit_button.pack(expand=True)
@@ -152,9 +145,33 @@ if __name__ == '__main__':
     right_frame = Frame(root, bg=left_frame_bg, bd=10)
     right_frame.place(relx=0.2, rely=0, relwidth=0.8, relheight=1)
 
-    places_listbox = Listbox(right_frame, width=50)
-    places_listbox.insert(1, "location1")
-    places_listbox.insert(2, "location2")
-    places_listbox.place(relwidth=1, relheight=1)
+    places_view = ttk.Treeview(right_frame, selectmode='browse')
+    places_view['show'] = 'headings'
+    places_view["columns"] = ("1", "2","3","4","5","6", "7")
+    places_view.column("#0", width=0, minwidth=0, stretch=YES)
+    places_view.column("1", width=160, minwidth=80, stretch=YES)
+    places_view.column("2", width=80, minwidth=50, stretch=YES)
+    places_view.column("3", width=80, minwidth=50, stretch=YES)
+    places_view.column("4", width=80, minwidth=50, stretch=YES)
+    places_view.column("5", width=80, minwidth=50, stretch=YES)
+    places_view.column("6", width=80, minwidth=50, stretch=YES)
+    places_view.column("7", width=80, minwidth=50, stretch=YES)
+
+    places_view.heading("1", text="Name", anchor=W)
+    places_view.heading("2", text="Latitude", anchor=W)
+    places_view.heading("3", text="Longitude", anchor=W)
+    places_view.heading("4", text="Category", anchor=W)
+    places_view.heading("5", text="Sub Category", anchor=W)
+    places_view.heading("6", text="Country", anchor=W)
+    places_view.heading("7", text="Rating", anchor=W)
+
+    folder1 = places_view.insert("", 1, None, values=("Pic de Font Blanca","42.64991", "1.53335", "...","...","Europe/Andorra","4.5"))
+
+    places_view.pack(expand=True, fill=BOTH)
+
+    # places_listbox = Listbox(right_frame, width=50)
+    # places_listbox.insert(1, "location1")
+    # places_listbox.insert(2, "location2")
+    # places_listbox.place(relwidth=1, relheight=1)
 
     root.mainloop()
