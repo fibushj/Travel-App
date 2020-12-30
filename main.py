@@ -15,7 +15,7 @@ initialize_db(cursor)
 
 cursor.close()
 
-
+mydb.commit()
 mydb.close()
 
 
