@@ -10,7 +10,7 @@ CREATE TABLE feature_class(
 
 CREATE TABLE feature_code(
     id VARCHAR(5) PRIMARY KEY,
-    feature_class VARCHAR(10) NOT NULL,
+    feature_class CHAR(1) NOT NULL,
     name VARCHAR(47) NOT NULL,
     description VARCHAR(233)
 );
@@ -30,16 +30,16 @@ CREATE TABLE user(
     full_name VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL,
     password VARCHAR(100) NOT NULL,
-    date_of_birth DATETIME NOT NULL
+    date_of_birth DATE NOT NULL
 );
 
 CREATE TABLE review(
     user_id INT NOT NULL,
     place_id INT NOT NULL,
     rating INT NOT NULL,
-    trip_type VARCHAR(45),
-    trip_season VARCHAR(45) NOT NULL,
+    trip_type INT NOT NULL,
+    trip_season INT NOT NULL,
     anonymous_review TINYINT,
-    review TINYTEXT,
+    review TEXT,
     PRIMARY KEY (user_id, place_id, trip_season)
 );
