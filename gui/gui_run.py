@@ -1,5 +1,7 @@
+from functools import partial
 from tkinter import *
 from tkinter import ttk
+from tkinter.scrolledtext import ScrolledText
 
 from gui.myFilterList import MyFilterList
 
@@ -7,11 +9,6 @@ HEIGHT = 768
 WIDTH = 1366
 LEFT_FRAME_BG= '#80c1ff'
 RIGHT_FRAME_BG= '#80c1ff'
-
-
-
-
-
 
 class MainGUI:
 
@@ -71,10 +68,46 @@ class MainGUI:
 
         self.locations_view.pack(expand=True, fill=BOTH)
 
-        # places_listbox = Listbox(right_frame, width=50)
-        # places_listbox.insert(1, "location1")
-        # places_listbox.insert(2, "location2")
-        # places_listbox.place(relwidth=1, relheight=1)
+        def hello():
+            print("hello!")
+
+        menu_widget = Menu(window)
+        self.is_logged_in=False
+        menu_widget.add_command(label="Profile", command=self.log_in if (not self.is_logged_in) else self.view_profile)
+        menu_widget.add_command(label="Quit", command=window.quit)
+
+        # display the menu
+        window.config(menu=menu_widget)
+
+    #TODO: implement!
+    def validate_and_login(self,username, password):
+        print("username entered :", username.get())
+        print("password entered :", password.get())
+        return
+
+    def log_in(self):
+        login_screen = Toplevel()
+        login_screen.title("Login")
+        login_screen.geometry("300x250")
+        Label(login_screen, text="Please enter login details").pack()
+        Label(login_screen, text="").pack()
+        Label(login_screen, text="Username").pack()
+        username = StringVar()
+        username_login_entry = Entry(login_screen, textvariable=username)
+        username_login_entry.pack()
+        Label(login_screen, text="").pack()
+        Label(login_screen, text="Password").pack()
+        password = StringVar()
+        password__login_entry = Entry(login_screen, textvariable=password, show='*')
+        password__login_entry.pack()
+        Label(login_screen, text="").pack()
+        validate_and_login = partial(self.validate_and_login, username, password)
+        Button(login_screen, text="Login", width=10, height=1,command=validate_and_login).pack()
+        login_screen.mainloop()
+
+    #TODO: implement!
+    def view_profile(self):
+        pass
 
     def run(self):
         window.mainloop()
@@ -144,6 +177,7 @@ class MainGUI:
 
         trip_filter = self.create_trip_filter(f_search_tab)
 
+        #TODO JHONNY: query to get results using all filters and insert to locations_view
         f_submit_button = Button(f_search_tab, text="Search", width=20, command=lambda: None)
         f_submit_button.pack(expand=True)
 
@@ -184,33 +218,24 @@ class MainGUI:
 
         trip_filter = self.create_trip_filter(radius_search_tab)
 
+        #TODO JHONNY: query to get results using all filters and insert to locations_view
         radius_submit_button = Button(radius_search_tab, text="Search", width=20, command=lambda: None)
         radius_submit_button.pack(expand=True)
 
-    def create_review_box(self, parent_frame, user_name, trip_season, review_text):
+    def create_review_box(self, text_widget, user_name, trip_season, review_text):
 
-        frame = Frame(parent_frame, bg='white', bd=0, highlightthickness=0)
-        frame.pack()
 
-        canvas = Canvas(frame, bg=LEFT_FRAME_BG, width=50, height=50)
-        canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold",
-                           text=user_name[0])
-        canvas.pack(side=LEFT, anchor=NW)
-        text = Text(frame, bd=0)
-        text.pack(side=LEFT, anchor=NW)
+        text_widget.tag_configure("sender", font="Arial 12 bold")
+        text_widget.tag_configure("message", font="Arial 10")  # , lmargin1=55, lmargin2=55)
+        text_widget.tag_configure("date", font="Arial 8")
 
-        text.tag_configure("sender", font="Arial 12 bold")
-        text.tag_configure("message", font="Arial 10")  # , lmargin1=55, lmargin2=55)
-        text.tag_configure("date", font="Arial 8")
+        text_widget.insert("end", user_name.title() + ' ', "sender")
+        text_widget.insert("end", trip_season + '\n', 'date')
+        text_widget.insert("end", '\n')  # Add a blank line to move next one down.
+        text_widget.insert("end", review_text + '\n', 'message')
+        text_widget.insert("end", "____________________________________________________________" + '\n\n', 'message')
 
-        text.insert("end", user_name.title() + ' ', "sender")
-        text.insert("end", trip_season + '\n', 'date')
-        text.insert("end", '\n')  # Add a blank line to move next one down.
-        text.insert("end", review_text + '\n\n', 'message')
 
-    def onFrameConfigure(self,canvas):
-        '''Reset the scroll region to encompass the inner frame'''
-        canvas.configure(scrollregion=canvas.bbox("all"))
 
     def location_double_click(self, event):
         item = self.locations_view.selection()[0]
@@ -219,27 +244,22 @@ class MainGUI:
         item_window.title(item_name)
         item_window.geometry(str(int(WIDTH/2)) + 'x' + str(int(HEIGHT/2)))
 
-        canvas = Canvas(item_window, borderwidth=0, background="#ffffff")
-        frame = Frame(canvas, background="#ffffff")
-        vsb = Scrollbar(item_window, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=vsb.set)
+        reviews_frame = Frame(item_window,  bd=6, highlightthickness=0)
+        reviews_frame.pack(expand=True, fill=BOTH)
 
-        vsb.pack(side="right", fill="y")
-        canvas.pack(side="left", fill="both", expand=True)
-        canvas.create_window((4, 4), window=frame, anchor="nw")
-
-        frame.bind("<Configure>", lambda event, canvas=canvas: self.onFrameConfigure(canvas))
-
-
-        print("you clicked on", self.locations_view.item(item)["values"])
+        text_widget = ScrolledText(reviews_frame, bd=0, bg='#80c1ff')
+        text_widget.pack(side=LEFT, anchor=NW, expand=True, fill=BOTH)
 
         user_name = 'Tom'
         trip_season = 'Summer'
-        review_text = 'Hi Jim!\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassapgbfiusdiugfsdhgrdshgdfkjghljdfhg dhfkg hfdkjgh dsf kj dhfkhgkj fhgk hfdkg jktdth jdrf kgrtdfh grst hgkd hg dfhug dfhoh uuhgih rtdbhygrhtkj\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap?'
-        self.create_review_box(frame,user_name,trip_season,review_text)
-        user_name1 = 'ghjngc'
+        review_text = 'The best location EVER!\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassapgbfiusdiugfsdhgrdshgdfkjghljdfhg dhfkg hfdkjgh dsf kj dhfkhgkj fhgk hfdkg jktdth jdrf kgrtdfh grst hgkd hg dfhug dfhoh uuhgih rtdbhygrhtkj\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap?'
+        self.create_review_box(text_widget, user_name, trip_season, review_text)
+        user_name1 = 'Jhonny'
         review_text1 = 'hi!!\n mannnnn'
-        self.create_review_box(frame,user_name1,trip_season,review_text1)
+        self.create_review_box(text_widget, user_name1, trip_season, review_text1)
+
+        print("you clicked on", self.locations_view.item(item)["values"])
+
 
 
 
@@ -250,3 +270,85 @@ if __name__ == '__main__':
     gui = MainGUI(window, database)
     gui.run()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # def create_review_box(self, parent_frame, user_name, trip_season, review_text):
+    #
+    #     frame = Frame(parent_frame, bg='blue', bd=0, highlightthickness=0)
+    #     frame.pack(expand=True, fill= BOTH)
+    #
+    #     canvas = Canvas(frame, bg=LEFT_FRAME_BG, width=50, height=50)
+    #     canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold",
+    #                        text=user_name[0])
+    #     canvas.pack(side=LEFT, anchor=NW)
+    #     text = Text(frame, bd=0,bg='pink')
+    #     text.pack(side=LEFT, anchor=NW)
+    #
+    #     text.tag_configure("sender", font="Arial 12 bold")
+    #     text.tag_configure("message", font="Arial 10")  # , lmargin1=55, lmargin2=55)
+    #     text.tag_configure("date", font="Arial 8")
+    #
+    #     text.insert("end", user_name.title() + ' ', "sender")
+    #     text.insert("end", trip_season + '\n', 'date')
+    #     text.insert("end", '\n')  # Add a blank line to move next one down.
+    #     text.insert("end", review_text + '\n\n', 'message')
+    #
+    #
+    #
+    # def location_double_click(self, event):
+    #     item = self.locations_view.selection()[0]
+    #     item_name=self.locations_view.item(item)["values"][0]
+    #     item_window=Toplevel()
+    #     item_window.title(item_name)
+    #     item_window.geometry(str(int(WIDTH/2)) + 'x' + str(int(HEIGHT/2)))
+    #
+    #     canvas = Canvas(item_window, borderwidth=0, background="orange")
+    #     frame = Frame(canvas, background="red")
+    #     frame.place(relx=0, rely=0, relwidth=1, relheight=1)
+    #     vsb = Scrollbar(item_window, orient="vertical", command=canvas.yview)
+    #     canvas.configure(yscrollcommand=vsb.set)
+    #
+    #     vsb.pack(side="right", fill="y")
+    #     canvas.pack(side="left", fill="both", expand=True)
+    #     canvas.create_window((4, 4), window=frame, anchor="nw")
+    #     def onFrameConfigure(canvas):
+    #         '''Reset the scroll region to encompass the inner frame'''
+    #         canvas.configure(scrollregion=canvas.bbox("all"))
+    #     frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
+    #     def _on_mousewheel(event):
+    #         canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+    #     frame.bind_all("<MouseWheel>", _on_mousewheel)
+    #
+    #
+    #
+    #     print("you clicked on", self.locations_view.item(item)["values"])
+    #
+    #     user_name = 'Tom'
+    #     trip_season = 'Summer'
+    #     review_text = 'Hi Jim!\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassapgbfiusdiugfsdhgrdshgdfkjghljdfhg dhfkg hfdkjgh dsf kj dhfkhgkj fhgk hfdkg jktdth jdrf kgrtdfh grst hgkd hg dfhug dfhoh uuhgih rtdbhygrhtkj\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap?'
+    #     self.create_review_box(frame,user_name,trip_season,review_text)
+    #     user_name1 = 'ghjngc'
+    #     review_text1 = 'hi!!\n mannnnn'
+    #     self.create_review_box(frame,user_name1,trip_season,review_text1)
