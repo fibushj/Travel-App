@@ -1,4 +1,3 @@
-data/
 /my.conf
 .mypy_cache/
 __pycache__/
