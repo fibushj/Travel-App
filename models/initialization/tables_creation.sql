@@ -33,6 +33,16 @@ CREATE TABLE user(
     date_of_birth DATE NOT NULL
 );
 
+CREATE TABLE trip_type (
+    id INT NOT NULL PRIMARY KEY,
+    name VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE trip_season(
+    id INT NOT NULL PRIMARY KEY,
+    name VARCHAR(45) NOT NULL
+)
+
 CREATE TABLE review(
     user_id INT NOT NULL,
     place_id INT NOT NULL,

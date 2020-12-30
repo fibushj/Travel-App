@@ -54,6 +54,26 @@ def populate_tables(cursor):
     set id=@geonameid, name=@asciiname, coordinates=POINT(@latitude, @longitude), elevation=if(@elevation="", null, @elevation);  
     """)
 
+    cursor.execute(f"""
+    LOAD DATA INFILE '{trip_seasons_path}'
+    INTO TABLE trip_type
+    FIELDS TERMINATED BY ','
+    enclosed by '"'
+    LINES TERMINATED BY '\r\n' 
+    IGNORE 1 LINES
+    (id, name);
+    """)
+
+    cursor.execute(f"""
+    LOAD DATA INFILE '{trip_seasons_path}'
+    INTO TABLE trip_season
+    FIELDS TERMINATED BY ','
+    enclosed by '"'
+    LINES TERMINATED BY '\r\n' 
+    IGNORE 1 LINES
+    (id, name);
+    """)
+
     populate_users(cursor)
     populate_reviews(cursor)
 
