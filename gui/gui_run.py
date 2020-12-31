@@ -1,8 +1,6 @@
 from functools import partial
 from tkinter import *
 from tkinter import ttk
-from tkinter.scrolledtext import ScrolledText
-
 from gui.myFilterList import MyFilterList
 
 HEIGHT = 768
@@ -12,9 +10,10 @@ RIGHT_FRAME_BG= '#80c1ff'
 
 class MainGUI:
 
-    def __init__(self,window, database):
-        window.title("Around The World")
-        window.geometry(str(WIDTH) + 'x' + str(HEIGHT))
+    def __init__(self, database):
+        self.window = Tk()
+        self.window.title("Around The World")
+        self.window.geometry(str(WIDTH) + 'x' + str(HEIGHT))
 
         # canvas = Canvas(window, height=HEIGHT, width=WIDTH)
         # canvas.pack()
@@ -23,7 +22,7 @@ class MainGUI:
         # background_label = Label(window, image=background_image)
         # background_label.place(relwidth=1, relheight=1)
 
-        left_frame = Frame(window, bg=LEFT_FRAME_BG, bd=3)
+        left_frame = Frame(self.window, bg=LEFT_FRAME_BG, bd=3)
         left_frame.place(relx=0, rely=0, relwidth=0.2, relheight=1)
 
         # Create Tab Control
@@ -38,7 +37,7 @@ class MainGUI:
         left_tabs_control.pack(expand=True, fill=BOTH)
 
         # Create right frame
-        right_frame = Frame(window, bg=RIGHT_FRAME_BG, bd=10)
+        right_frame = Frame(self.window, bg=RIGHT_FRAME_BG, bd=10)
         right_frame.place(relx=0.2, rely=0, relwidth=0.8, relheight=1)
 
         self.locations_view = ttk.Treeview(right_frame, selectmode='browse')
@@ -65,19 +64,15 @@ class MainGUI:
         folder1 = self.locations_view.insert("", 1, None, values=(
         "Pic de Font Blanca", "42.64991", "1.53335", "...", "...", "Europe/Andorra", "4.5"))
         self.locations_view.bind("<Double-1>", self.location_double_click)
-
         self.locations_view.pack(expand=True, fill=BOTH)
 
-        def hello():
-            print("hello!")
-
-        menu_widget = Menu(window)
+        menu_widget = Menu(self.window)
         self.is_logged_in=False
         menu_widget.add_command(label="Profile", command=self.log_in if (not self.is_logged_in) else self.view_profile)
-        menu_widget.add_command(label="Quit", command=window.quit)
+        menu_widget.add_command(label="Quit", command=self.window.quit)
 
         # display the menu
-        window.config(menu=menu_widget)
+        self.window.config(menu=menu_widget)
 
     #TODO: implement!
     def validate_and_login(self,username, password):
@@ -110,7 +105,7 @@ class MainGUI:
         pass
 
     def run(self):
-        window.mainloop()
+        self.window.mainloop()
 
     def create_filter_list(self,frame, source):
         filter_list = MyFilterList(frame, source=source, display_rule=lambda item: item,
@@ -155,11 +150,6 @@ class MainGUI:
         #TODO JHONNY: fill list using query for all countries full name
         country_list_items = ["Denmark", "France", "Germany", "Israel", "United States", "United Kingdom"]
         country_filter_list = self.create_filter_list(country_frame, country_list_items)
-
-        # city_frame=Frame(f_search_tab, bg=left_frame_bg, bd=3)
-        # city_frame.pack(expand=True, fill=X)
-        # city_label= Label(city_frame,text="City:", anchor=W,bg=left_frame_bg).pack(expand=True, fill=X)
-        # city_entry= Entry(city_frame).pack(expand=True, fill=X)
 
         f_class_frame = Frame(f_search_tab, bg=LEFT_FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
@@ -222,18 +212,27 @@ class MainGUI:
         radius_submit_button = Button(radius_search_tab, text="Search", width=20, command=lambda: None)
         radius_submit_button.pack(expand=True)
 
-    def create_review_box(self, text_widget, user_name, trip_season, review_text):
 
+    def create_review_box(self, parent_frame, user_name, trip_season, review_text):
 
-        text_widget.tag_configure("sender", font="Arial 12 bold")
-        text_widget.tag_configure("message", font="Arial 10")  # , lmargin1=55, lmargin2=55)
-        text_widget.tag_configure("date", font="Arial 8")
+        frame = Frame(parent_frame, bg='blue', bd=0, highlightthickness=0)
+        frame.pack(expand=True, fill= BOTH)
 
-        text_widget.insert("end", user_name.title() + ' ', "sender")
-        text_widget.insert("end", trip_season + '\n', 'date')
-        text_widget.insert("end", '\n')  # Add a blank line to move next one down.
-        text_widget.insert("end", review_text + '\n', 'message')
-        text_widget.insert("end", "____________________________________________________________" + '\n\n', 'message')
+        canvas = Canvas(frame, bg=LEFT_FRAME_BG, width=50, height=50)
+        canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold",
+                           text=user_name[0])
+        canvas.pack(side=LEFT, anchor=NW)
+        text = Text(frame, bd=0,bg='pink')
+        text.pack(side=LEFT, anchor=NW)
+
+        text.tag_configure("sender", font="Arial 12 bold")
+        text.tag_configure("message", font="Arial 10")  # , lmargin1=55, lmargin2=55)
+        text.tag_configure("date", font="Arial 8")
+
+        text.insert("end", user_name.title() + ' ', "sender")
+        text.insert("end", trip_season + '\n', 'date')
+        text.insert("end", '\n')  # Add a blank line to move next one down.
+        text.insert("end", review_text + '\n\n', 'message')
 
 
 
@@ -244,111 +243,29 @@ class MainGUI:
         item_window.title(item_name)
         item_window.geometry(str(int(WIDTH/2)) + 'x' + str(int(HEIGHT/2)))
 
-        reviews_frame = Frame(item_window,  bd=6, highlightthickness=0)
-        reviews_frame.pack(expand=True, fill=BOTH)
+        canvas = Canvas(item_window, borderwidth=0, background="orange")
+        frame = Frame(canvas, background="red")
+        frame.place(relx=0, rely=0, relwidth=1, relheight=1)
+        scrollbar = Scrollbar(item_window, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
 
-        text_widget = ScrolledText(reviews_frame, bd=0, bg='#80c1ff')
-        text_widget.pack(side=LEFT, anchor=NW, expand=True, fill=BOTH)
-
-        user_name = 'Tom'
-        trip_season = 'Summer'
-        review_text = 'The best location EVER!\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassapgbfiusdiugfsdhgrdshgdfkjghljdfhg dhfkg hfdkjgh dsf kj dhfkhgkj fhgk hfdkg jktdth jdrf kgrtdfh grst hgkd hg dfhug dfhoh uuhgih rtdbhygrhtkj\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap?'
-        self.create_review_box(text_widget, user_name, trip_season, review_text)
-        user_name1 = 'Jhonny'
-        review_text1 = 'hi!!\n mannnnn'
-        self.create_review_box(text_widget, user_name1, trip_season, review_text1)
+        scrollbar.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+        canvas.create_window((4, 4), window=frame, anchor="nw")
+        def onFrameConfigure(canvas):
+            '''Reset the scroll region to encompass the inner frame'''
+            canvas.configure(scrollregion=canvas.bbox("all"))
+        frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        frame.bind_all("<MouseWheel>", _on_mousewheel)
 
         print("you clicked on", self.locations_view.item(item)["values"])
 
-
-
-# TODO JHONNY: Database should be the only thing that modifies the database. When the GUI needs to send information to, or get information from the database, it can call methods on the database.
-database = NotImplemented
-window = Tk()
-
-def run_gui():    
-    gui = MainGUI(window, database)
-    gui.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def create_review_box(self, parent_frame, user_name, trip_season, review_text):
-    #
-    #     frame = Frame(parent_frame, bg='blue', bd=0, highlightthickness=0)
-    #     frame.pack(expand=True, fill= BOTH)
-    #
-    #     canvas = Canvas(frame, bg=LEFT_FRAME_BG, width=50, height=50)
-    #     canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold",
-    #                        text=user_name[0])
-    #     canvas.pack(side=LEFT, anchor=NW)
-    #     text = Text(frame, bd=0,bg='pink')
-    #     text.pack(side=LEFT, anchor=NW)
-    #
-    #     text.tag_configure("sender", font="Arial 12 bold")
-    #     text.tag_configure("message", font="Arial 10")  # , lmargin1=55, lmargin2=55)
-    #     text.tag_configure("date", font="Arial 8")
-    #
-    #     text.insert("end", user_name.title() + ' ', "sender")
-    #     text.insert("end", trip_season + '\n', 'date')
-    #     text.insert("end", '\n')  # Add a blank line to move next one down.
-    #     text.insert("end", review_text + '\n\n', 'message')
-    #
-    #
-    #
-    # def location_double_click(self, event):
-    #     item = self.locations_view.selection()[0]
-    #     item_name=self.locations_view.item(item)["values"][0]
-    #     item_window=Toplevel()
-    #     item_window.title(item_name)
-    #     item_window.geometry(str(int(WIDTH/2)) + 'x' + str(int(HEIGHT/2)))
-    #
-    #     canvas = Canvas(item_window, borderwidth=0, background="orange")
-    #     frame = Frame(canvas, background="red")
-    #     frame.place(relx=0, rely=0, relwidth=1, relheight=1)
-    #     vsb = Scrollbar(item_window, orient="vertical", command=canvas.yview)
-    #     canvas.configure(yscrollcommand=vsb.set)
-    #
-    #     vsb.pack(side="right", fill="y")
-    #     canvas.pack(side="left", fill="both", expand=True)
-    #     canvas.create_window((4, 4), window=frame, anchor="nw")
-    #     def onFrameConfigure(canvas):
-    #         '''Reset the scroll region to encompass the inner frame'''
-    #         canvas.configure(scrollregion=canvas.bbox("all"))
-    #     frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
-    #     def _on_mousewheel(event):
-    #         canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-    #     frame.bind_all("<MouseWheel>", _on_mousewheel)
-    #
-    #
-    #
-    #     print("you clicked on", self.locations_view.item(item)["values"])
-    #
-    #     user_name = 'Tom'
-    #     trip_season = 'Summer'
-    #     review_text = 'Hi Jim!\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassapgbfiusdiugfsdhgrdshgdfkjghljdfhg dhfkg hfdkjgh dsf kj dhfkhgkj fhgk hfdkg jktdth jdrf kgrtdfh grst hgkd hg dfhug dfhoh uuhgih rtdbhygrhtkj\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap?'
-    #     self.create_review_box(frame,user_name,trip_season,review_text)
-    #     user_name1 = 'ghjngc'
-    #     review_text1 = 'hi!!\n mannnnn'
-    #     self.create_review_box(frame,user_name1,trip_season,review_text1)
+        user_name = 'Tom'
+        trip_season = 'Summer'
+        review_text = 'Hi Jim!\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassapgbfiusdiugfsdhgrdshgdfkjghljdfhg dhfkg hfdkjgh dsf kj dhfkhgkj fhgk hfdkg jktdth jdrf kgrtdfh grst hgkd hg dfhug dfhoh uuhgih rtdbhygrhtkj\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap\nwhassap?'
+        self.create_review_box(frame,user_name,trip_season,review_text)
+        user_name1 = 'ghjngc'
+        review_text1 = 'hi!!\n mannnnn'
+        self.create_review_box(frame,user_name1,trip_season,review_text1)

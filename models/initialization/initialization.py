@@ -22,9 +22,9 @@ def populate_tables(cursor):
     LINES TERMINATED BY '\r\n' 
 	IGNORE 1 LINES
     (id, name);      
-    """)   
+    """)
 
-     
+
     cursor.execute(f"""
     LOAD DATA INFILE '{feature_codes_path}'
     INTO TABLE feature_code
@@ -32,7 +32,7 @@ def populate_tables(cursor):
     enclosed by '"'
     LINES TERMINATED BY '\r\n' 
     (@dummy, feature_class, id, name, description); 
-    """)    
+    """)
 
     cursor.execute(f"""
     LOAD DATA INFILE '{country_codes_path}'
@@ -50,7 +50,7 @@ def populate_tables(cursor):
     FIELDS TERMINATED BY ','
     LINES TERMINATED BY '\n' 
     IGNORE 1 LINES
-    (@geonameid,@dummy,@asciiname,@dummy,@latitude,@longitude,@dummy,feature_code,country_code,@dummy,@dummy,@dummy,@dummy,@dummy,population,elevation,@dummy,@dummy,@dummy)
+    (@geonameid,@asciiname,@latitude,@longitude,feature_code,country_code,population,elevation)
     set id=@geonameid, name=@asciiname, coordinates=POINT(@latitude, @longitude), elevation=if(@elevation="", null, @elevation);  
     """)
 

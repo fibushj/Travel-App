@@ -5,7 +5,7 @@ ADD
 
 ALTER TABLE
     location
-ADD 
+ADD
     FOREIGN KEY (feature_code) REFERENCES feature_code(id);
 
 ALTER TABLE
