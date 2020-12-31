@@ -22,3 +22,13 @@ ALTER TABLE
     review
 ADD
     FOREIGN KEY (place_id) REFERENCES location(id);
+
+ALTER TABLE
+    review
+ADD
+    FOREIGN KEY (trip_type) REFERENCES trip_type(id);
+
+ALTER TABLE
+    review
+ADD
+    FOREIGN KEY (trip_season) REFERENCES trip_season(id);
