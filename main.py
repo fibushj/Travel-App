@@ -18,13 +18,8 @@ run_gui()
 
 # cursor.close()
 
-<<<<<<< HEAD
 
 # mydb.close()
-=======
-mydb.commit()
-mydb.close()
->>>>>>> 3f59eca369ef859b148afb8d0e5ec433cfd5d186
 
 
 
