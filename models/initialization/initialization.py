@@ -55,7 +55,7 @@ def populate_tables(cursor):
     """)
 
     cursor.execute(f"""
-    LOAD DATA INFILE '{trip_seasons_path}'
+    LOAD DATA INFILE '{trip_types_path}'
     INTO TABLE trip_type
     FIELDS TERMINATED BY ','
     enclosed by '"'
@@ -74,12 +74,12 @@ def populate_tables(cursor):
     (id, name);
     """)
 
-    populate_users(cursor)
-    populate_reviews(cursor)
+    # populate_users(cursor)
+    # populate_reviews(cursor)
 
 
 def populate_users(cursor):
-    command = ['INSERT INTO sadna_project.user(full_name, email, password, date_of_birth) VALUES']
+    command = [f'INSERT INTO {db_name}.user(full_name, email, password, date_of_birth) VALUES']
     first_names = []
     last_names = []
 
@@ -110,7 +110,7 @@ def generate_date():
 
 def populate_reviews(cursor):
     text_review = ["Terrible place", "Nothing remarkable", "Waste of time", "Not bad at all", "Had a lot of fun", "The best place in the whole world"]
-    command = ["INSERT INTO sadna_project.review(user_id, place_id, rating, trip_type, trip_season, anonymous_review, review) VALUES"]
+    command = [f"INSERT INTO {db_name}.review(user_id, place_id, rating, trip_type, trip_season, anonymous_review, review) VALUES"]
     users_limit = 40000
 
     for user_id in range(users_limit):

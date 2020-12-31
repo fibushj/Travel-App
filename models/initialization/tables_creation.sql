@@ -41,7 +41,7 @@ CREATE TABLE trip_type (
 CREATE TABLE trip_season(
     id INT NOT NULL PRIMARY KEY,
     name VARCHAR(45) NOT NULL
-)
+);
 
 CREATE TABLE review(
     user_id INT NOT NULL,
