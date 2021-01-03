@@ -6,3 +6,4 @@ with open("models/config.txt", 'r') as f:
     feature_codes_path = f.readline().strip()
     trip_types_path = f.readline().strip()
     trip_seasons_path = f.readline().strip()
+    reviews_path = f.readline().strip()
