@@ -6,11 +6,13 @@ import csv
 
 
 def initialize_db(cursor):
-    cursor.execute(f"""CREATE DATABASE {db_name}""")
+    #cursor.execute(f"""CREATE DATABASE {db_name}""")
     cursor.execute(f"USE {db_name}")
-    execute_sql_file(cursor, "models/initialization/tables_creation.sql")
-    execute_sql_file(cursor, "models/initialization/foreign_keys.sql")
-    populate_tables(cursor)
+    #execute_sql_file(cursor, "models/initialization/tables_creation.sql")
+    #execute_sql_file(cursor, "models/initialization/foreign_keys.sql")
+    #populate_tables(cursor)
+    populate_users(cursor)
+    populate_reviews(cursor)
 
 
 def populate_tables(cursor):
@@ -73,9 +75,6 @@ def populate_tables(cursor):
     IGNORE 1 LINES
     (id, name);
     """)
-
-    # populate_users(cursor)
-    # populate_reviews(cursor)
 
 
 def populate_users(cursor):

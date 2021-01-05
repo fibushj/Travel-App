@@ -2,6 +2,7 @@
 from gui.gui_run import run_gui
 from models.initialization.initialization import initialize_db
 import mysql.connector
+from models.config import *
 
 
 #run_gui()
@@ -13,8 +14,8 @@ mydb = mysql.connector.connect(
 cursor = mydb.cursor()
 cursor.execute('SET sql_mode = ""')
 
-initialize_db(cursor)
 
+#initialize_db(cursor)
 
 cursor.close()
 
