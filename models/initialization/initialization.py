@@ -12,6 +12,10 @@ def initialize_db(cursor):
     execute_sql_file(cursor, "models/initialization/foreign_keys.sql")
     populate_tables(cursor)
 
+    populate_users(cursor)
+    # generate_reviews(cursor)
+
+
 
 def populate_tables(cursor):
     cursor.execute(f"""
@@ -74,8 +78,14 @@ def populate_tables(cursor):
     (id, name);
     """)
 
-    # populate_users(cursor)
-    # populate_reviews(cursor)
+    cursor.execute(f""" 
+    LOAD DATA INFILE '{reviews_path}'
+    IGNORE INTO TABLE review
+    FIELDS TERMINATED BY ','
+    enclosed by ''
+    LINES TERMINATED BY '\r\n' 
+    (user_id, place_id, rating, trip_type, trip_season, anonymous_review, review); 
+    """)
 
 
 def populate_users(cursor):
@@ -108,22 +118,30 @@ def generate_date():
     return f"{random.randint(1965, 2005)}-{random.randint(1, 12)}-{random.randint(1, 28)}"
 
 
-def populate_reviews(cursor):
-    text_review = ["Terrible place", "Nothing remarkable", "Waste of time", "Not bad at all", "Had a lot of fun", "The best place in the whole world"]
-    command = [f"INSERT INTO {db_name}.review(user_id, place_id, rating, trip_type, trip_season, anonymous_review, review) VALUES"]
-    users_limit = 40000
 
-    for user_id in range(users_limit):
-        for _ in range(2):
-            is_anonimous = random.randint(0,1)
-            location_id = random.randint(870000, 1000000)
-            trip_type_id = random.randint(1, 10)
-            trip_season_id = random.randint(1, 4)
-            rating = random.randint(1, 10)
-            command.extend([f"({user_id}, {location_id}, {rating}, {trip_type_id}, {trip_season_id}, {is_anonimous}, '{text_review[rating//2]}')", ", "])
+
+def generate_reviews(cursor):
+    cursor.execute('SELECT * FROM location WHERE country_code = "IL";')
+    records = cursor.fetchall()
+    write_reviews_set(records, [6,10], [0, 40], [0, 10000])
+    write_reviews_set(records, [1,5], [0, 8], [10001, 20000])
+
+
+def write_reviews_set(places_list, ratings_range, reviews_range, users_range):
+    with open('reviews.csv', 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        text_review = ["Terrible place", "Nothing remarkable", "Waste of time", "Not bad at all", "Had a lot of fun", "The best place in the whole world"]
+
+        for place_row in places_list:
+            rewievs_num = random.randint(reviews_range[0], reviews_range[1])
+            user_id = random.randint(users_range[0], users_range[1])
+            location_id = place_row[0]
+            for _ in range(rewievs_num):
+                is_anonimous = random.randint(0,1)
+                trip_type_id = random.randint(1, 10)
+                trip_season_id = random.randint(1, 4)
+                user_id += 1
+                rating = random.randint(ratings_range[0], ratings_range[1])
+                writer.writerow([user_id, location_id, rating, trip_type_id, trip_season_id, is_anonimous, text_review[rating//2]])
     
-    command[-1] = ';'
-    cursor.execute("".join(command))
-
-
 

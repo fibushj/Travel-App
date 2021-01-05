@@ -5,3 +5,4 @@ C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/feature_classes.csv
 C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/feature_codes.csv
 C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/trip_type.csv
 C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/trip_season.csv
+C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/reviews.csv
