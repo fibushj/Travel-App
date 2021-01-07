@@ -40,5 +40,3 @@ class LocationWindow(Toplevel):
         pie_label = Label(pie_frame, text="Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 20)).pack(
             expand=True, fill=X)
         a = PieGraph(pie_frame)
-
-        self.mainloop()
