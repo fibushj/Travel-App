@@ -2,8 +2,6 @@ from tkinter import *
 from tkinter import ttk
 from gui.location_window import LocationWindow
 
-FRAME_BG = '#80c1ff'
-
 class LocationsView(ttk.Treeview):
     def __init__(self,containing_frame):
         ttk.Treeview.__init__(self,containing_frame, selectmode='browse')

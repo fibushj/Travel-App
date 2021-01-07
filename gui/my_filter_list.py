@@ -4,7 +4,6 @@
 from tkinter import *
 from tkinter.ttk import *
 
-
 __all__ = ["MyFilterList"]
 
 

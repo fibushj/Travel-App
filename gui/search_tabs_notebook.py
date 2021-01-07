@@ -1,9 +1,11 @@
 from tkinter import *
 from tkinter import ttk
 from ttkwidgets import TickScale
-from gui.myFilterList import MyFilterList
 
-FRAME_BG = '#80c1ff'
+from gui import consts
+from gui.consts import FRAME_BG
+from gui.my_filter_list import MyFilterList
+
 
 class SearchTabsNotebook(ttk.Notebook):
     def __init__(self,containing_frame):
@@ -35,10 +37,8 @@ class SearchTabsNotebook(ttk.Notebook):
         trip_frame.pack(expand=True, fill=X)
         trip_type_val = StringVar()
         trip_season_val = StringVar()
-        trip_type_options = ["Family", "Couples", "Solo"]
-        trip_season_options = ["Spring", "Summer", "Fall", "Winter"]
-        trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *trip_type_options)
-        trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *trip_season_options)
+        trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *consts.trip_type_options)
+        trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *consts.trip_season_options)
         trip_type_dropmenu.config(width=10)
         trip_season_dropmenu.config(width=10)
         trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
@@ -80,7 +80,7 @@ class SearchTabsNotebook(ttk.Notebook):
         radius_frame.pack(expand=True, fill=X)
         radius_label = Label(radius_frame, text="Radius:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         ttk.Style().configure('Horizontal.TScale', background=FRAME_BG) # define a style object for the scale widget
-        radius_slider = TickScale(radius_frame, from_=0, to=1000,style="Horizontal.TScale", orient=HORIZONTAL, digits=0)
+        radius_slider = TickScale(radius_frame, from_=0, to=100,style="Horizontal.TScale", orient=HORIZONTAL, digits=0)
         radius_slider.pack(expand=True, fill=X)
 
         self.create_buttom_part(radius_search_tab)

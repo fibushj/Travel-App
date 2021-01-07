@@ -1,7 +1,8 @@
 from datetime import date
 from tkinter import *
 
-FRAME_BG= '#80c1ff'
+from gui.consts import FRAME_BG
+
 
 def create_scrollable_frame(containing_frame):
     # Combining canvas with a frame makes the frame scrollable. allows to scroll through all widgets inside the frame.
