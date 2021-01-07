@@ -18,16 +18,39 @@ class DataBaseManager:
 
     ### - FETCH OVERALL DATA FUNCTIONS
     def fetchCountries(self):
-        self.cursor.execute("SELECT * FROM country;")
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute("SELECT * FROM country;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
 
     def fetchFeatureClasses(self):
-        self.cursor.execute("SELECT * FROM feature_class;")
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute("SELECT * FROM feature_class;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
 
     def fetchFeatureCodes(self):
-        self.cursor.execute("SELECT * FROM feature_code;")
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute("SELECT * FROM feature_code;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
+
+    def fetchTripSeasons(self):
+        try:
+            self.cursor.execute("SELECT * FROM trip_season;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
+
+    def fetchTripTypes(self):
+        try:
+            self.cursor.execute("SELECT * FROM trip_type;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
 
 
 
@@ -35,48 +58,58 @@ class DataBaseManager:
     ### - SEARCH QUERIES FUNCTIONS
     #TODO: add args
     def fetchLocationsCountriesMode(self):
-        self.cursor.execute("SELECT * FROM location LIMIT 100;")
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute("SELECT * FROM location LIMIT 100;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
 
     #TODO: add args
     def fetchLocationsCoordsMode(self):
-        self.cursor.execute("SELECT * FROM location LIMIT 100;")
-        return self.cursor.fetchall()
-
+        try:
+            self.cursor.execute("SELECT * FROM location LIMIT 100;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
 
 
     def fetchLocationReviews(self, location_id):
-        self.cursor.execute(f"SELECT * FROM review WHERE place_id = {location_id} LIMIT 50;")
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute(f"SELECT * FROM review WHERE place_id = {location_id} LIMIT 50;")
+            return self.cursor.fetchall(), None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
+
 
     #TODO: add function contents
     def fetchLocationStatistics(self, location_id):
         return None
 
 
-
-
     ### - USER RELATED FUNCTIONS
     def logInUser(self, email, password):
-        if self.user_logged_in:
-            return False
+        try:
+            if self.user_logged_in:
+                return False, "User already logged in"
 
-        self.cursor.execute(f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
-        query_result = self.cursor.fetchall()
-        if(len(query_result) > 0):
-            self.user_data = query_result[0]
-            self.user_logged_in = True
-            return True
-        else:
-            return False
+            self.cursor.execute(f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
+            query_result = self.cursor.fetchall()
+            if(len(query_result) > 0):
+                self.user_data = query_result[0]
+                self.user_logged_in = True
+                return True, None
+            else:
+                return False, "Such user not exist"
+        except Exception as err:
+                return False, generateErrorMessage(err.args[0])
 
 
     def logOutUser(self):
         if self.user_logged_in:
             self.user_logged_in = False
-            return True
+            return True, None
         else:
-            return False
+            return False, "User was not logged in"
 
 
     def _validateUserEnryData(self, email):
@@ -87,27 +120,34 @@ class DataBaseManager:
         else:
             return False
 
-    
+
     def registerUser(self, full_name, email, password, birth_date):
-        if self._validateUserEnryData(email):
-            return False
-        else:
-            self.cursor.execute(f"INSERT INTO user(full_name, email, password, date_of_birth) VALUES('{full_name}', '{email}', '{password}', '{birth_date}');")
-            self.logInUser(email, password)
-            return True
+        try:
+            if self._validateUserEnryData(email):
+                return False, "Such email already taken"
+            else:
+                self.cursor.execute(f"INSERT INTO user(full_name, email, password, date_of_birth) VALUES('{full_name}', '{email}', '{password}', '{birth_date}');")
+                self.logInUser(email, password)
+                return True, None
+        except Exception as err:
+                return False, generateErrorMessage(err.args[0])
 
     
     def isUserLoggedIn(self):
         return self.user_logged_in
     
+
     def getCurrentUserReviews(self):
-        if self.user_logged_in:
-            self.cursor.execute(f"SELECT * FROM review WHERE user_id = {self.user_data[0]} LIMIT 50;")
-            return self.cursor.fetchall()
-        else:
-            return None
-    
-    def isReviewBelongsToUser(self, place_id, season_id):
+        try:
+            if self.user_logged_in:
+                self.cursor.execute(f"SELECT * FROM review WHERE user_id = {self.user_data[0]} LIMIT 50;")
+                return self.cursor.fetchall(), None
+            else:
+                return None, "You had not logged in"
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
+
+    def _isReviewBelongsToUser(self, place_id, season_id):
         if self.isUserLoggedIn():
             self.cursor.execute(f"SELECT COUNT(*) FROM review WHERE user_id = {self.user_data[0]} AND place_id = {place_id} AND trip_season = {season_id};")
             if self.cursor.fetchall()[0][0] > 0:
@@ -115,37 +155,52 @@ class DataBaseManager:
             else:
                 return False
         else:
-            False
+            return False
     
+
     def deleteCurrentUserReview(self, place_id, season_id):
-        if self.isUserLoggedIn() and self.isReviewBelongsToUser(place_id, season_id):
-            self.cursor.execute(f"""DELETE FROM review WHERE user_id = {self.user_data[0]} 
+        try:
+            if self.isUserLoggedIn() and self._isReviewBelongsToUser(place_id, season_id):
+                self.cursor.execute(f"""DELETE FROM review WHERE user_id = {self.user_data[0]} 
                                     AND place_id = {place_id} AND trip_season = {season_id};""")
-            return True
-        else:
-            return False
+                return True, None
+            elif not self.isUserLoggedIn():
+                return False, "You had not logged in"
+            else:
+                return False, "Review was not written by user"
+        except Exception as err:
+                return False, generateErrorMessage(err.args[0])
     
+
     def addCurrentUserReview(self, place_id, rating, trip_type, trip_season, anon_rew, text_rew):
-        if self.isUserLoggedIn() and (rating <= 10 and rating >= 1) and (type(text_rew) == type('')) and (len(text_rew) < 300):
-            try:
+        try:
+            if self.isUserLoggedIn() and (rating <= 10 and rating >= 1) and ((type(text_rew) == type('')) and (len(text_rew) < 300)):
                 self.cursor.execute(f"""INSERT INTO review VALUES ({self.user_data[0]},  {place_id}, 
-                                        {rating}, {trip_type}, {trip_season}, {anon_rew}, '{text_rew}');""")
-            except Exception as err:
-                raise Exception(generateErrorMessage(err.args[0]))
-            return True
-        else:
-            return False
+                                    {rating}, {trip_type}, {trip_season}, {anon_rew}, '{text_rew}');""")
+                return True, None
+            elif not self.isUserLoggedIn():
+                return False, "You had not logged in"
+            elif not (rating <= 10 and rating >= 1):
+                return False, "Rating must be value between 1 and 10"
+            elif not ((type(text_rew) == type('')) and (len(text_rew) < 300)):
+                return False, "Text review must be less that 300 characters"
+        except Exception as err:
+                return False, generateErrorMessage(err.args[0])
+    
     
     def isLocationReviewedByUser(self, place_id):
-        if self.isUserLoggedIn():
-            self.cursor.execute(f"SELECT COUNT(*) FROM review WHERE user_id = {self.user_data[0]} AND place_id = {place_id};")
-            result_list = self.cursor.fetchall()
-            if result_list[0][0] > 0:
-                return True
+        try:
+            if self.isUserLoggedIn():
+                self.cursor.execute(f"SELECT COUNT(*) FROM review WHERE user_id = {self.user_data[0]} AND place_id = {place_id};")
+                result_list = self.cursor.fetchall()
+                if result_list[0][0] > 0:
+                    return True, None
+                else:
+                    return False, "User not viewed current location"
             else:
-                return False
-        else:
-            False
+                return False, "You had not logged in"
+        except Exception as err:
+                return False, generateErrorMessage(err.args[0])
 
 
 
@@ -157,4 +212,6 @@ class DataBaseManager:
 
 def generateErrorMessage(error_number):
     if error_number == 1062:
-        return "You already wrote review for such trip."
+        return "You already wrote review for such trip"
+    else:
+        return f"Unknown error code:{error_number}" 
