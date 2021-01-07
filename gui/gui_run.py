@@ -3,7 +3,7 @@ from ctypes import windll
 from datetime import date
 from functools import partial
 from tkinter import *
-from tkinter import ttk, font
+from tkinter import ttk
 
 import tkcalendar as tkcalendar
 from ttkwidgets import TickScale
