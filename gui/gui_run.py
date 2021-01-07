@@ -1,6 +1,5 @@
 #TODO: refactor reg and login, refactor utils, show reviews in profile, del(/update) reviews in profile, add review in double click, statistics?,
 from ctypes import windll
-from datetime import date
 from functools import partial
 from tkinter import *
 from tkinter import ttk
@@ -14,8 +13,7 @@ from gui.profile_window import ProfileWindow
 
 HEIGHT = 960
 WIDTH = 1366
-LEFT_FRAME_BG= '#80c1ff'
-RIGHT_FRAME_BG= '#80c1ff'
+FRAME_BG = '#80c1ff'
 
 class MainGUI:
     reg_window=None
@@ -27,7 +25,7 @@ class MainGUI:
         self.window.title("Around The World")
         self.window.geometry(str(WIDTH) + 'x' + str(HEIGHT))
 
-        left_frame = Frame(self.window, bg=LEFT_FRAME_BG, bd=3)
+        left_frame = Frame(self.window, bg=FRAME_BG, bd=3)
         left_frame.place(relx=0, rely=0, relwidth=0.2, relheight=1)
         # Create Tab Control
         left_tabs_control = ttk.Notebook(left_frame)
@@ -38,7 +36,7 @@ class MainGUI:
         left_tabs_control.pack(expand=True, fill=BOTH)
 
         # Create right frame
-        right_frame = Frame(self.window, bg=RIGHT_FRAME_BG, bd=10)
+        right_frame = Frame(self.window, bg=FRAME_BG, bd=10)
         right_frame.place(relx=0.2, rely=0, relwidth=0.8, relheight=1)
         self.create_locations_view(right_frame)
 
@@ -188,7 +186,7 @@ class MainGUI:
 
     # Create second tab in left frame- search by radius tab
     def create_trip_filter(self,frame):
-        trip_frame = Frame(frame, bg=LEFT_FRAME_BG, bd=3)
+        trip_frame = Frame(frame, bg=FRAME_BG, bd=3)
         trip_frame.pack(expand=True, fill=X)
         trip_type_val = StringVar()
         trip_season_val = StringVar()
@@ -205,26 +203,26 @@ class MainGUI:
 
     # Create first tab in left frame- search by feature tab
     def create_f_search_tab(self,left_frame,left_tabs_control):
-        f_search_tab = Frame(left_frame, bg=LEFT_FRAME_BG, bd=3)
+        f_search_tab = Frame(left_frame, bg=FRAME_BG, bd=3)
         left_tabs_control.add(f_search_tab, text='Search By Country')
 
-        country_frame = Frame(f_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        country_frame = Frame(f_search_tab, bg=FRAME_BG, bd=3)
         country_frame.pack(expand=True, fill=X)
-        country_label = Label(country_frame, text="Country:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        country_label = Label(country_frame, text="Country:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         #TODO JHONNY: fill list using query for all countries full name
         country_list_items = ["Denmark", "France", "Germany", "Israel", "United States", "United Kingdom"]
         country_filter_list = self.create_filter_list(country_frame, country_list_items)
 
-        f_class_frame = Frame(f_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        f_class_frame = Frame(f_search_tab, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
-        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         #TODO JHONNY: fill list using query for all feature classes full name
         f_class_list_items = ["country, state, region...", "stream, lake...", "parks,area..."]
         f_class_filter_list = self.create_filter_list(f_class_frame, f_class_list_items)
 
-        f_code_frame = Frame(f_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        f_code_frame = Frame(f_search_tab, bg=FRAME_BG, bd=3)
         f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         #TODO JHONNY: fill list using query for all feature codes full name that match the selected feature code
         f_code_list_items = ["Will change according to the feature class"]
         f_code_filter_list = self.create_filter_list(f_code_frame, f_code_list_items)
@@ -237,38 +235,38 @@ class MainGUI:
 
 
     def create_radius_search_tab(self,left_frame,left_tabs_control):
-        radius_search_tab = Frame(left_frame, bg=LEFT_FRAME_BG, bd=3)
+        radius_search_tab = Frame(left_frame, bg=FRAME_BG, bd=3)
         left_tabs_control.add(radius_search_tab, text='Search By Radius')
 
-        lat_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        lat_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         lat_frame.pack(expand=True, fill=X)
-        lat_label = Label(lat_frame, text="Latitude:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        lat_label = Label(lat_frame, text="Latitude:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         lat_entry = Entry(lat_frame)
         lat_entry.pack(expand=True, fill=X)
 
-        lon_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        lon_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         lon_frame.pack(expand=True, fill=X)
-        lon_label = Label(lon_frame, text="Longitude:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        lon_label = Label(lon_frame, text="Longitude:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         lon_entry = Entry(lon_frame)
         lon_entry.pack(expand=True, fill=X)
 
-        radius_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        radius_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         radius_frame.pack(expand=True, fill=X)
-        radius_label = Label(radius_frame, text="Radius:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
-        ttk.Style().configure('Horizontal.TScale',background=LEFT_FRAME_BG) # define a style object for the scale widget
+        radius_label = Label(radius_frame, text="Radius:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        ttk.Style().configure('Horizontal.TScale', background=FRAME_BG) # define a style object for the scale widget
         radius_slider = TickScale(radius_frame, from_=0, to=1000,style="Horizontal.TScale", orient=HORIZONTAL, digits=0)
         radius_slider.pack(expand=True, fill=X)
 
-        f_class_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        f_class_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
-        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         #TODO JHONNY: fill list using query for all feature classes full name
         f_class_list_items = ["country, state, region...", "stream, lake...", "parks,area..."]
         f_class_filter_list = self.create_filter_list(f_class_frame, f_class_list_items)
 
-        f_code_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
+        f_code_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
+        f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         #TODO JHONNY: fill list using query for all feature codes full name that match the selected feature code
         f_code_list_items = ["Will change according to the feature class"]
         f_code_filter_list = self.create_filter_list(f_code_frame, f_code_list_items)

@@ -1,8 +1,7 @@
 from tkinter import Toplevel, Label, X, Button, W
 from gui.gui_utils import create_scrollable_frame, create_review_box
 
-LEFT_FRAME_BG= '#80c1ff'
-RIGHT_FRAME_BG= '#80c1ff'
+FRAME_BG= '#80c1ff'
 HEIGHT = 960
 WIDTH = 1366
 
@@ -13,7 +12,7 @@ class ProfileWindow(Toplevel):
         self.geometry(str(int(WIDTH / 1.29)) + 'x' + str(int(HEIGHT / 2)))
 
         scrollable_frame = create_scrollable_frame(self)
-        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=LEFT_FRAME_BG, font=("Arial", 20)).pack(
+        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 20)).pack(
             expand=True, fill=X)
 
         # TODO JHONNY: query reviews for this user
@@ -24,7 +23,7 @@ class ProfileWindow(Toplevel):
         create_review_box(scrollable_frame, reviewer_name, reviewer_birthday, trip_season, review_text)
 
         # TODO JHONNY: delete the review whose delete button was pressed
-        delete_button = Button(scrollable_frame, text="Delete", width=15, bg=RIGHT_FRAME_BG, command=lambda: None)
+        delete_button = Button(scrollable_frame, text="Delete", width=15, bg=FRAME_BG, command=lambda: None)
         delete_button.pack(expand=True)
 
         reviewer_name2 = 'Me'
@@ -32,5 +31,5 @@ class ProfileWindow(Toplevel):
         reviewer_birthday2 = {"year": 2000, "month": 12, "day": 8}
         create_review_box(scrollable_frame, reviewer_name2, reviewer_birthday2, trip_season, review_text2)
 
-        delete_button2 = Button(scrollable_frame, text="Delete", width=15, bg=RIGHT_FRAME_BG, command=lambda: None)
+        delete_button2 = Button(scrollable_frame, text="Delete", width=15, bg=FRAME_BG, command=lambda: None)
         delete_button2.pack(expand=True)

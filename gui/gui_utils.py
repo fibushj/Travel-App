@@ -1,8 +1,7 @@
 from datetime import date
 from tkinter import *
 
-LEFT_FRAME_BG= '#80c1ff'
-RIGHT_FRAME_BG= '#80c1ff'
+FRAME_BG= '#80c1ff'
 
 def create_scrollable_frame(containing_frame):
     # Combining canvas with a frame makes the frame scrollable. allows to scroll through all widgets inside the frame.
@@ -33,7 +32,7 @@ def create_review_box(containing_frame, reviewer_name, reviewer_birthday, trip_s
     frame = Frame(containing_frame, bg='white', bd=0, highlightthickness=0)
     frame.pack(expand=True, fill= BOTH)
 
-    canvas = Canvas(frame, bg=LEFT_FRAME_BG, width=50, height=50)
+    canvas = Canvas(frame, bg=FRAME_BG, width=50, height=50)
     canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold", text=reviewer_name[0])
     canvas.pack(side=LEFT, anchor=NW)
     text = Text(frame, bd=0, width=70)

@@ -4,8 +4,7 @@ from tkinter import ttk
 from gui.gui_utils import create_scrollable_frame, create_review_box
 from gui.pie_graph import PieGraph
 
-LEFT_FRAME_BG= '#80c1ff'
-RIGHT_FRAME_BG= '#80c1ff'
+FRAME_BG = '#80c1ff'
 HEIGHT = 960
 WIDTH = 1366
 
@@ -17,10 +16,10 @@ class LocationWindow(Toplevel):
         self.geometry(str(int(WIDTH / 1.14)) + 'x' + str(int(HEIGHT / 2.2)))
 
         scrollable_frame = create_scrollable_frame(self)
-        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=LEFT_FRAME_BG, font=("Arial", 20)).pack(
+        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 20)).pack(
             expand=True, fill=X)
 
-        add_review_button = Button(scrollable_frame, text="Add review", width=15, bg=RIGHT_FRAME_BG,
+        add_review_button = Button(scrollable_frame, text="Add review", width=15, bg=FRAME_BG,
                                    command=lambda: None)
         add_review_button.pack(expand=True)
 
@@ -38,7 +37,7 @@ class LocationWindow(Toplevel):
 
         pie_frame = (ttk.Frame(self))
         pie_frame.pack(side="left", expand=False)
-        pie_label = Label(pie_frame, text="Statistics:", anchor=W, bg=LEFT_FRAME_BG, font=("Arial", 20)).pack(
+        pie_label = Label(pie_frame, text="Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 20)).pack(
             expand=True, fill=X)
         a = PieGraph(pie_frame)
 

@@ -1,6 +1,3 @@
-from tkinter import *
-from tkinter import ttk
-from tkinter.scrolledtext import ScrolledText
 from random import randint
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
