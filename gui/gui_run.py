@@ -1,4 +1,4 @@
-#TODO: refactor, show reviews in profile, del(/update) reviews in profile, add review in double click, statistics?,
+#TODO: refactor reg and login, refactor utils, show reviews in profile, del(/update) reviews in profile, add review in double click, statistics?,
 from ctypes import windll
 from datetime import date
 from functools import partial
@@ -6,9 +6,11 @@ from tkinter import *
 from tkinter import ttk, font
 
 import tkcalendar as tkcalendar
+from ttkwidgets import TickScale
 
+from gui.location_window import LocationWindow
 from gui.myFilterList import MyFilterList
-from gui.pie_graph import PieGraph
+from gui.profile_window import ProfileWindow
 
 HEIGHT = 960
 WIDTH = 1366
@@ -43,6 +45,7 @@ class MainGUI:
         menu_widget = Menu(self.window)
         self.is_logged_in=True
         menu_widget.add_command(label="Profile", command=self.log_in_screen if (not self.is_logged_in) else self.view_profile)
+        menu_widget.add_command(label="Statistics", command=self.statistics_screen)
         menu_widget.add_command(label="Quit", command=self.window.destroy)
 
         # display the menu
@@ -128,6 +131,11 @@ class MainGUI:
 
         self.reg_window.mainloop()
 
+    def statistics_screen(self):
+        self.login_window = Toplevel()
+        self.login_window.title("Statistics")
+        self.login_window.geometry("210x250")
+
 
     def create_locations_view(self, containing_frame):
         self.locations_view = ttk.Treeview(containing_frame, selectmode='browse')
@@ -158,25 +166,7 @@ class MainGUI:
 
     #TODO: implement!
     def view_profile(self):
-        profile_window = Toplevel()
-        profile_window.title("My Profile")
-        profile_window.geometry(str(int(WIDTH / 1.29)) + 'x' + str(int(HEIGHT / 2)))
-
-        scrollable_frame = self.create_scrollable_frame(profile_window)
-        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=LEFT_FRAME_BG, font=("Arial", 20)).pack(expand=True, fill=X)
-
-        #TODO JHONNY: query reviews for this item
-        reviewer_name = 'Me'
-        trip_season = 'Summer'
-        reviewer_birthday={"year":1995,"month":3,"day":28}
-        review_text = 'The content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\n'
-        self.create_review_box(scrollable_frame,reviewer_name,reviewer_birthday,trip_season,review_text)
-        reviewer_name2 = 'Me'
-        review_text2 = 'The content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\n'
-        reviewer_birthday2={"year":2000,"month":12,"day":8}
-        self.create_review_box(scrollable_frame,reviewer_name2,reviewer_birthday2,trip_season,review_text2)
-
-
+        profile_window = ProfileWindow()
 
     def run(self):
         self.window.mainloop()
@@ -253,17 +243,20 @@ class MainGUI:
         lat_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
         lat_frame.pack(expand=True, fill=X)
         lat_label = Label(lat_frame, text="Latitude:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
-        lat_entry = Entry(lat_frame).pack(expand=True, fill=X)
+        lat_entry = Entry(lat_frame)
+        lat_entry.pack(expand=True, fill=X)
 
         lon_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
         lon_frame.pack(expand=True, fill=X)
         lon_label = Label(lon_frame, text="Longitude:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
-        lon_entry = Entry(lon_frame).pack(expand=True, fill=X)
+        lon_entry = Entry(lon_frame)
+        lon_entry.pack(expand=True, fill=X)
 
         radius_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
         radius_frame.pack(expand=True, fill=X)
         radius_label = Label(radius_frame, text="Radius:", anchor=W, bg=LEFT_FRAME_BG).pack(expand=True, fill=X)
-        radius_slider = Scale(radius_frame, from_=0, to=1000, orient=HORIZONTAL)
+        ttk.Style().configure('Horizontal.TScale',background=LEFT_FRAME_BG) # define a style object for the scale widget
+        radius_slider = TickScale(radius_frame, from_=0, to=1000,style="Horizontal.TScale", orient=HORIZONTAL, digits=0)
         radius_slider.pack(expand=True, fill=X)
 
         f_class_frame = Frame(radius_search_tab, bg=LEFT_FRAME_BG, bd=3)
@@ -286,79 +279,9 @@ class MainGUI:
         radius_submit_button = Button(radius_search_tab, text="Search", width=20, command=lambda: None)
         radius_submit_button.pack(expand=True)
 
-
-    def create_review_box(self, containing_frame, reviewer_name, reviewer_birthday, trip_season, review_text):
-        frame = Frame(containing_frame, bg='white', bd=0, highlightthickness=0)
-        frame.pack(expand=True, fill= BOTH)
-
-        canvas = Canvas(frame, bg=LEFT_FRAME_BG, width=50, height=50)
-        canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold", text=reviewer_name[0])
-        canvas.pack(side=LEFT, anchor=NW)
-        text = Text(frame, bd=0, width=70)
-        text.pack(side=LEFT, anchor=NW)
-
-        text.tag_configure("sender", font="Arial 15 bold")
-        text.tag_configure("age", font="Arial 10")
-        text.tag_configure("trip_season", font="Arial 8")
-        text.tag_configure("message", font=("Helvetica", "13"),lmargin1=15, lmargin2=15)
-
-        text.insert("end", reviewer_name.title() + ' ', "sender")
-        today = date.today()
-        reviewer_age= today.year - reviewer_birthday["year"] - ((today.month, today.day) < (reviewer_birthday["month"], reviewer_birthday["day"]))
-        text.insert("end", str(reviewer_age) + '\n', 'age')
-        text.insert("end", trip_season+'\n','trip_season')
-        text.insert("end", '\n')
-        text.insert("end", review_text + '\n\n', 'message')
-
     def location_double_click(self, event):
         item = self.locations_view.selection()[0]
-        item_name=self.locations_view.item(item)["values"][0]
-        item_window=Toplevel()
-        item_window.title(item_name)
-        item_window.geometry(str(int(WIDTH/1.14)) + 'x' + str(int(HEIGHT/2.2)))
-
-        scrollable_frame=self.create_scrollable_frame(item_window)
-        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=LEFT_FRAME_BG,font=("Arial", 20)).pack(expand=True, fill=X)
-
-        #TODO JHONNY: query reviews for this item
-        reviewer_name = 'Tom'
-        trip_season = 'Summer'
-        reviewer_birthday={"year":1995,"month":3,"day":28}
-        review_text = 'The content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\n'
-        self.create_review_box(scrollable_frame,reviewer_name,reviewer_birthday,trip_season,review_text)
-        reviewer_name2 = 'Jhonny'
-        review_text2 = 'The content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\n'
-        reviewer_birthday2={"year":2000,"month":12,"day":8}
-        self.create_review_box(scrollable_frame,reviewer_name2,reviewer_birthday2,trip_season,review_text2)
-
-        pie_frame = (ttk.Frame(item_window))
-        pie_frame.pack(side="left", expand=False)
-        pie_label = Label(pie_frame, text="Statistics:", anchor=W, bg=LEFT_FRAME_BG,font=("Arial", 20)).pack(expand=True, fill=X)
-        a = PieGraph(pie_frame)
-
-        item_window.mainloop()
+        item_name = self.locations_view.item(item)["values"][0]
+        LocationWindow(item,item_name)
 
 
-    def create_scrollable_frame(self, containing_frame):
-        # Combining canvas with a frame makes the frame scrollable. allows to scroll through all widgets inside the frame.
-        canvas = Canvas(containing_frame, borderwidth=0)
-        scrollable_frame = Frame(canvas)
-        scrollable_frame.place(relx=0, rely=0, relwidth=1, relheight=1)
-        scrollbar = Scrollbar(containing_frame, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        scrollbar.pack(side="right", fill="y")
-        canvas.pack(side="right", fill="both", expand=True)
-        canvas.create_window((4, 4), window=scrollable_frame, anchor="nw")
-
-        def onFrameConfigure(canvas):
-            '''Reset the scroll region to encompass the inner frame'''
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        scrollable_frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
-
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-
-        scrollable_frame.bind_all("<MouseWheel>", _on_mousewheel)
-        return scrollable_frame
