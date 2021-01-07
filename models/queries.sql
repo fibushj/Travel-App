@@ -1,10 +1,53 @@
 SET GLOBAL innodb_buffer_pool_size=268435456;
+ALTER TABLE location MODIFY COLUMN coordinates POINT;
+update location set coordinates=ST_GeomFromText(ST_AsText(Point(lat, lng)), 4326);
+ALTER TABLE location MODIFY COLUMN coordinates POINT SRID 4326 not null;
+ALTER TABLE location ADD INDEX(coordinates);
 
-SELECT *,(((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) 
-    + COS(@lat * PI() / 180) * COS(lat * PI() / 180) 
-    * COS((@lng - lng) * PI() / 180)) * 180 / PI()) 
-    * 60 * 1.1515)* 1.609344) AS distance FROM location HAVING distance<=30 ORDER BY distance ASC LIMIT 0 , 20;
+SET @R=200; -- km
+set @earth_radius=6378;
+set @lat = 40.730610;
+set @lng = -73.935242; -- new york coordinates
+set @km_per_lat_degree = @earth_radius * PI() / 180;
+set @lat_delta = @R /@km_per_lat_degree;
+set @lng_delta = @lat_delta / COS(@lat * PI() / 180);
+SET @lat_min = @lat - @lat_delta;
+SET @lat_max = @lat + @lat_delta;
+SET @lng_min = @lng - @lng_delta;
+SET @lng_max = @lng + @lng_delta;
+
+SELECT 
+     *,
+     (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) AS distance
+FROM
+    location
+WHERE
+	lat between @lat_min and @lat_max and lng between @lng_min and @lng_max 
+	and (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
+;    
     
+SET @g1 = ST_SRID(POINT(34.65365, 69.04978), 4326);
+SET @R=1.4;
+SET @lat_min = ST_Latitude(@g1) - (0.009*R); -- 34.64105
+SET @lat_max = ST_Latitude(@g1) + (0.009*R); -- 34.66625
+SET @lng_min = ST_Longitude(@g1) - (0.009*R); -- 69.03718
+SET @lng_max = ST_Longitude(@g1) + (0.009*R); -- 69.06238
+-- SET @rectangle = POLYGON((@lat_min @lng_min, @lat_min @lng_max, @lat_max @lng_max, @lat_max @lng_min));
+SET @rectangle = 'POLYGON((34.64105 69.03718, 34.64105 69.06238, 34.66625 69.06238, 34.66625 69.03718, 34.64105 69.03718))';
+SET @bounding_box = ST_GeomFromText(@rectangle, 4326);
+set @a = (select coordinates from location where id='1349943' limit 0, 1);
+select @a;
+select st_within(coordinates, @bounding_box), coordinates, @bounding_box from location WHERE st_within(coordinates, @bounding_box) and id='1349943'; 
+
+set @coordinates = ST_GeomFromText(ST_AsText(Point(34.65365, 69.04978)), 4326);
+select @coordinates;
+SELECT st_contains(@bounding_box, @coordinates), @bounding_box;
+
+update location set coordinates=ST_SRID(coordinates, 4326);
+update location set coordinates=ST_GeomFromText(ST_AsText(coordinates), 4326);
+ALTER TABLE location MODIFY COLUMN coordinates POINT SRID 4326 not null;
+ALTER TABLE location ADD INDEX(coordinates);
+alter table location drop index coordinates;
 ALTER TABLE location add column lat DECIMAL( 10, 8 ) NOT NULL;
 ALTER TABLE location add column lng DECIMAL( 11, 8 ) NOT NULL;
 ALTER TABLE location ADD INDEX(lat);
@@ -14,10 +57,10 @@ update location set lng=ST_Y(coordinates);
 
 SET @lat = 34.65365, @lng = 69.04978;
 
-SELECT *,(((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) 
+SELECT (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) 
     + COS(@lat * PI() / 180) * COS(lat * PI() / 180) 
     * COS((@lng - lng) * PI() / 180)) * 180 / PI()) 
-    * 60 * 1.1515)* 1.609344) AS distance FROM location HAVING distance<=30 ORDER BY distance ASC LIMIT 0 , 20;
+    * 60 * 1.1515)* 1.609344) AS distance FROM location where lat between @lat-0.3 and @lat+0.3 and lng between @lng-0.3 and @lng+0.3 ORDER BY distance DESC;
 
 
 -----------------------------
@@ -60,21 +103,100 @@ SELECT *,(((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180)
 
 SELECT ST_SRID( coordinates, 4326) from location;
 
-ALTER TABLE location MODIFY COLUMN coordinates POINT not null srid 0;
 SET GLOBAL innodb_buffer_pool_size=268435456;
-update location set coordinates=POINT(ST_X(coordinates), ST_Y(coordinates));
-SELECT l.name, ST_X(coordinates) latitude, ST_Y(coordinates) longitude, 
-(SELECT fclass.name from feature_code fcode 
-JOIN feature_class fclass ON fcode.feature_class=fclass.id and fcode.id=l.feature_code) category, 
-(SELECT fcode.name from feature_code fcode WHERE fcode.id=l.feature_code) subcategory,
-(SELECT c.name from country c where c.id=l.country_code) country
-FROM location l, country c where l.country_code=c.id and c.name = 'armenia';
+UPDATE location 
+SET 
+    coordinates = POINT(ST_X(coordinates),
+        ST_Y(coordinates));
 
-SELECT location.* FROM location, country where location.country_code=country.id and country.name = 'armenia'
-and feature_code='PPL';
 
-SELECT location.* FROM location, country, feature_code, feature_class where location.country_code=country.id and country.name = 'armenia' 
-and location.feature_code=feature_code.id and feature_code.feature_class=feature_class.id and feature_class.name='city, village';
+SELECT 
+    l.name,
+    ST_X(coordinates) latitude,
+    ST_Y(coordinates) longitude,
+    (SELECT 
+            fclass.name
+        FROM
+            feature_code fcode
+                JOIN
+            feature_class fclass ON fcode.feature_class = fclass.id
+        WHERE
+            fcode.id = l.feature_code) category,
+    (SELECT 
+            fcode.name
+        FROM
+            feature_code fcode
+        WHERE
+            fcode.id = l.feature_code) subcategory,
+    c.name as country
+FROM
+    location l
+        JOIN
+    country c ON l.country_code = c.id
+WHERE
+    c.name = 'israel';
+
+SELECT 
+    l.name,
+    ST_X(coordinates) latitude,
+    ST_Y(coordinates) longitude,
+    (SELECT 
+            fclass.name
+        FROM
+            feature_code fcode
+                JOIN
+            feature_class fclass ON fcode.feature_class = fclass.id
+        WHERE
+            fcode.id = l.feature_code) category,
+    (SELECT 
+            fcode.name
+        FROM
+            feature_code fcode
+        WHERE
+            fcode.id = l.feature_code) subcategory,
+    c.name as country
+FROM
+    location l
+        JOIN
+    country c ON l.country_code = c.id
+WHERE
+    c.name = 'armenia'
+        AND feature_code = 'PPL';
+
+SELECT 
+    l.name,
+    ST_X(coordinates) latitude,
+    ST_Y(coordinates) longitude,
+    (SELECT 
+            fclass.name
+        FROM
+            feature_code fcode
+                JOIN
+            feature_class fclass ON fcode.feature_class = fclass.id
+        WHERE
+            fcode.id = l.feature_code) category,
+    (SELECT 
+            fcode.name
+        FROM
+            feature_code fcode
+        WHERE
+            fcode.id = l.feature_code) subcategory,
+    c.name AS country
+FROM
+    location l
+        JOIN
+    country c ON l.country_code = c.id
+WHERE
+    c.name = 'armenia'
+        AND feature_code IN (SELECT 
+            fcode.id
+        FROM
+            feature_code fcode
+                JOIN
+            feature_class fclass ON fcode.feature_class = fclass.id
+        WHERE
+            fclass.name = 'city, village');
+        
 
 -- SELECT * FROM location, country, feature_class where country.name = 'armenia' 
 -- and feature_class.name='undersea';
