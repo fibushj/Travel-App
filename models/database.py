@@ -1,12 +1,12 @@
 import mysql.connector
-from os import O_NONBLOCK, system
+#from os import O_NONBLOCK, system
 from models.utils import execute_sql_file
 from models.config import *
 import random 
 import csv
 
 
-class Model:
+class Database:
     def initialize(self):
         self.mydb = mysql.connector.connect(
             option_files='my.conf',
@@ -14,19 +14,19 @@ class Model:
         )
         self.cursor = self.mydb.cursor()
         
-        #self.cursor.execute('SET sql_mode = ""')
-        #self.cursor.execute(f"""CREATE DATABASE {db_name}""")
+        # self.cursor.execute(f"""CREATE DATABASE {db_name}""")
         self.cursor.execute(f"USE {db_name}")
-        #execute_sql_file(self.cursor, "models/initialization/tables_creation.sql")
-        #execute_sql_file(self.cursor, "models/initialization/foreign_keys.sql")
-        #populate_tables(self.cursor)
+        # execute_sql_file(self.cursor, "models/initialization/tables_creation.sql")
+        # execute_sql_file(self.cursor, "models/initialization/foreign_keys.sql")
+
+        # self.populate_tables()
+        # self.populate_users()
+        # self.generate_reviews()
+        self.cursor.execute(f"USE {db_name}")
+
+
         
-        #populate_users(self.cursor)
-        # generate_reviews(self.cursor)
-
-
-
-    def close(self):
+    def close(self): #TODO call it
         self.cursor.close()
         self.mydb.close()
 
@@ -38,8 +38,8 @@ class Model:
 
 
 
-    def populate_tables(cursor):
-        cursor.execute(f"""
+    def populate_tables(self):
+        self.cursor.execute(f"""
         LOAD DATA INFILE '{feature_classes_path}'
         INTO TABLE feature_class
         FIELDS TERMINATED BY ':'
@@ -50,7 +50,7 @@ class Model:
         """)
 
 
-        cursor.execute(f"""
+        self.cursor.execute(f"""
         LOAD DATA INFILE '{feature_codes_path}'
         INTO TABLE feature_code
         FIELDS TERMINATED BY ','
@@ -59,7 +59,7 @@ class Model:
         (@dummy, feature_class, id, name, description); 
         """)
 
-        cursor.execute(f"""
+        self.cursor.execute(f"""
         LOAD DATA INFILE '{country_codes_path}'
         INTO TABLE country
         FIELDS TERMINATED BY ','
@@ -69,7 +69,7 @@ class Model:
         (id, name);    
         """)
 
-        cursor.execute(f"""
+        self.cursor.execute(f"""
         LOAD DATA INFILE '{dataset_path}'
         INTO TABLE location
         FIELDS TERMINATED BY ','
@@ -79,7 +79,7 @@ class Model:
         set id=@geonameid, name=@asciiname, coordinates=POINT(@latitude, @longitude), elevation=if(@elevation="", null, @elevation);  
         """)
 
-        cursor.execute(f"""
+        self.cursor.execute(f"""
         LOAD DATA INFILE '{trip_types_path}'
         INTO TABLE trip_type
         FIELDS TERMINATED BY ','
@@ -89,7 +89,7 @@ class Model:
         (id, name);
         """)
 
-        cursor.execute(f"""
+        self.cursor.execute(f"""
         LOAD DATA INFILE '{trip_seasons_path}'
         INTO TABLE trip_season
         FIELDS TERMINATED BY ','
@@ -99,7 +99,7 @@ class Model:
         (id, name);
         """)
 
-        cursor.execute(f""" 
+        self.cursor.execute(f""" 
         LOAD DATA INFILE '{reviews_path}'
         IGNORE INTO TABLE review
         FIELDS TERMINATED BY ','
@@ -109,7 +109,7 @@ class Model:
         """)
 
 
-    def populate_users(cursor):
+    def populate_users(self):
         command = [f'INSERT INTO {db_name}.user(full_name, email, password, date_of_birth) VALUES']
         first_names = []
         last_names = []
@@ -128,12 +128,12 @@ class Model:
                 full_name = f"{f_name} {l_name}"
                 email = f"{l_name}.{f_name}@gmail.com"
                 password = "123456"
-                date_of_birth = generate_date()
+                date_of_birth = self.generate_date()
                 command.extend([f"('{full_name}', '{email}', '{password}', '{date_of_birth}')", ", "])
         
         command[-1] = ';'
-        cursor.execute("".join(command))
-
+        self.cursor.execute("".join(command))
+        print("done")
 
     def generate_date(self):
         return f"{random.randint(1965, 2005)}-{random.randint(1, 12)}-{random.randint(1, 28)}"
@@ -141,14 +141,14 @@ class Model:
 
 
 
-    def generate_reviews(cursor):
-        cursor.execute('SELECT * FROM location WHERE country_code = "IL";')
-        records = cursor.fetchall()
-        write_reviews_set(records, [6,10], [0, 40], [0, 10000])
-        write_reviews_set(records, [1,5], [0, 8], [10001, 20000])
+    def generate_reviews(self):
+        self.cursor.execute('SELECT * FROM location WHERE country_code = "IL";')
+        records = self.cursor.fetchall()
+        self.write_reviews_set(records, [6,10], [0, 40], [0, 10000])
+        self.write_reviews_set(records, [1,5], [0, 8], [10001, 20000])
 
 
-    def write_reviews_set(places_list, ratings_range, reviews_range, users_range):
+    def write_reviews_set(self, places_list, ratings_range, reviews_range, users_range):
         with open('reviews.csv', 'a', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             text_review = ["Terrible place", "Nothing remarkable", "Waste of time", "Not bad at all", "Had a lot of fun", "The best place in the whole world"]
