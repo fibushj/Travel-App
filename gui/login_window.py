@@ -2,10 +2,6 @@ from functools import partial
 from tkinter import *
 from tkinter import ttk
 
-FRAME_BG = '#80c1ff'
-HEIGHT = 960
-WIDTH = 1366
-
 class LoginWindow(Toplevel):
     def __init__(self,gui):
         Toplevel.__init__(self)
