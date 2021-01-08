@@ -97,7 +97,7 @@ class Database:
                         WHERE
                             r.place_id = l.id
                             {review_conditions}
-                            ) average rating
+                            ) average_rating
                 """
         if country_name != "":
             query += """

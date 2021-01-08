@@ -10,6 +10,10 @@ SET @lat_max = @lat + @lat_delta;
 SET @lng_min = @lng - @lng_delta;
 SET @lng_max = @lng + @lng_delta;
 
+
+select (select avg(5))average_age from trip_type group by name;
+
+
  SELECT DISTINCT
     l.name,
     lat latitude,
