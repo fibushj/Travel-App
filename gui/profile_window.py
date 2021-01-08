@@ -1,18 +1,16 @@
 from tkinter import Toplevel, Label, X, Button, W
-from gui.gui_utils import create_scrollable_frame, create_review_box
 
-FRAME_BG= '#80c1ff'
-HEIGHT = 960
-WIDTH = 1366
+from gui.consts import FRAME_BG, WIDTH, HEIGHT
+from gui.gui_utils import create_scrollable_frame, create_review_box
 
 class ProfileWindow(Toplevel):
     def __init__(self):
         Toplevel.__init__(self)
         self.title("My Profile")
-        self.geometry(str(int(WIDTH / 1.29)) + 'x' + str(int(HEIGHT / 2)))
+        self.geometry(str(int(WIDTH / 1.75)) + 'x' + str(int(HEIGHT / 2)))
 
         scrollable_frame = create_scrollable_frame(self)
-        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 20)).pack(
+        reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
 
         # TODO JHONNY: query reviews for this user

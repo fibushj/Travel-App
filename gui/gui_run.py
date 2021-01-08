@@ -1,6 +1,8 @@
-#TODO: refactor reg and login, refactor utils, show reviews in profile, del(/update) reviews in profile, add review in double click, statistics?,
+#TODO: show reviews in profile, del(/update) reviews in profile, statistics?,
 from ctypes import windll
 from tkinter import *
+
+from gui.consts import WIDTH, HEIGHT, FRAME_BG
 from gui.locations_view import LocationsView
 from gui.login_window import LoginWindow
 from gui.profile_window import ProfileWindow
@@ -8,16 +10,14 @@ from gui.registration_window import RegWindow
 from gui.search_tabs_notebook import SearchTabsNotebook
 from gui.statistics_window import StatisticsWindow
 
-HEIGHT = 960
-WIDTH = 1366
-FRAME_BG = '#80c1ff'
+
 
 class MainGUI:
     reg_window=None
     login_window=None
     statistics_window=None
 
-    def __init__(self, database):
+    def __init__(self, db_manager):
         windll.shcore.SetProcessDpiAwareness(1) # fix blurred fonts
 
         self.window = Tk()
@@ -36,7 +36,7 @@ class MainGUI:
         self.create_locations_view(right_frame)
 
         menu_widget = Menu(self.window)
-        self.is_logged_in=False
+        self.is_logged_in=True
         menu_widget.add_command(label="Profile", command=self.create_login_window if (not self.is_logged_in) else self.create_profile_window)
         menu_widget.add_command(label="Statistics", command=self.create_statistics_window)
         menu_widget.add_command(label="Quit", command=self.window.destroy)

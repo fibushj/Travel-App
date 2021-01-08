@@ -4,10 +4,6 @@ from tkinter import ttk
 
 import tkcalendar
 
-FRAME_BG = '#80c1ff'
-HEIGHT = 960
-WIDTH = 1366
-
 class RegWindow(Toplevel):
     def __init__(self,gui):
         Toplevel.__init__(self)
