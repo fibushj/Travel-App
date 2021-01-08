@@ -8,12 +8,48 @@ from gui.my_filter_list import MyFilterList
 
 
 class SearchTabsNotebook(ttk.Notebook):
-    def __init__(self,containing_frame):
+    def __init__(self,containing_frame, db_manager, locations_view):
+        self.db_manager=db_manager
+        self.locations_view=locations_view
         ttk.Notebook.__init__(self,containing_frame)
         # Create first tab in left frame- search by feature tab
         self.create_f_search_tab(containing_frame)
         # Create second tab in left frame- search by radius tab
         self.create_radius_search_tab(containing_frame)
+
+    # Create first tab in left frame- search by feature tab
+    def create_f_search_tab(self,containing_frame):
+        f_search_tab = Frame(containing_frame, bg=FRAME_BG, bd=3)
+        self.add(f_search_tab, text='Search By Country')
+
+        country_frame = Frame(f_search_tab, bg=FRAME_BG, bd=3)
+        country_frame.pack(expand=True, fill=X)
+        country_label = Label(country_frame, text="Country:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        #TODO: only fullname?
+        country_list_items = [x[1] for x in self.db_manager.fetchCountries()]
+        self.country_filter_list = self.create_filter_list(country_frame, country_list_items)
+
+        self.create_buttom_part(f_search_tab)
+
+
+    def create_buttom_part(self,containing_frame):
+        f_class_frame = Frame(containing_frame, bg=FRAME_BG, bd=3)
+        f_class_frame.pack(expand=True, fill=X)
+        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        #TODO: only fullname?
+        f_class_list_items = [x[1] for x in self.db_manager.fetchFeatureClasses()]
+        self.f_class_filter_list = self.create_filter_list(f_class_frame, f_class_list_items)
+
+        f_code_frame = Frame(containing_frame, bg=FRAME_BG, bd=3)
+        f_code_frame.pack(expand=True, fill=X)
+        f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_code_list_items = ["Please choose feature class first!"]
+        self.f_code_filter_list = self.create_filter_list(f_code_frame, f_code_list_items)
+
+        trip_filter = self.create_trip_filter(containing_frame)
+
+        f_submit_button = Button(containing_frame, text="Search", width=20, command=self.f_search_and_update_locations)
+        f_submit_button.pack(expand=True)
 
 
     def create_filter_list(self,frame, source):
@@ -26,39 +62,40 @@ class SearchTabsNotebook(ttk.Notebook):
             if item: filter_list.set_entry_text(item)
 
         # Show the result of the calculation on Return or double-click
+        # TODO: for feature codes only- fill list using query for all feature codes full name that match the selected feature class
         filter_list.bind("<Return>", show_result)
         filter_list.bind("<Double-Button-1>", show_result)
         return filter_list
-
 
     # Create second tab in left frame- search by radius tab
     def create_trip_filter(self,frame):
         trip_frame = Frame(frame, bg=FRAME_BG, bd=3)
         trip_frame.pack(expand=True, fill=X)
-        trip_type_val = StringVar()
-        trip_season_val = StringVar()
-        trip_type_dropmenu = ttk.OptionMenu(trip_frame, trip_type_val, "Trip type", "All", *consts.trip_type_options)
-        trip_season_dropmenu = ttk.OptionMenu(trip_frame, trip_season_val, "Trip season", "All", *consts.trip_season_options)
+        self.trip_type_val = StringVar()
+        self.trip_season_val = StringVar()
+        trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.trip_type_val, "Trip type", "All", *consts.trip_type_options, command=lambda selection: self.trip_type_val.set(selection))
+        trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.trip_season_val, "Trip season", "All", *consts.trip_season_options, command=lambda selection: self.trip_season_val.set(selection))
         trip_type_dropmenu.config(width=10)
         trip_season_dropmenu.config(width=10)
         trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
         trip_season_dropmenu.pack(side="right", padx=3, expand=True, fill=X)
         # trip_type_dropmenu.bind("<Return>", print_something)
 
+    def f_search_and_update_locations(self):
+        country_choice=self.country_filter_list.selection()
+        f_class_choice=self.f_class_filter_list.selection()
+        f_code_choice=self.f_code_filter_list.selection()
+        trip_type_choice=self.trip_type_val.get()
+        trip_season_choice=self.trip_season_val.get()
+        # TODO: query to get results using all filters and insert to locations_view
+        # results=self.db_manager.fetchLocationsCountriesMode(country_choice,f_class_choice,f_code_choice,trip_type_choice,trip_season_choice)
+        self.locations_view.clear_table()
+        # TODO: insert all results that match the user's input, in this format:
+        self.locations_view.insert_row(("Pic de Font Blanca", "42.64991", "1.53335", "...", "...", "Europe/Andorra", "4.5"))
 
-    # Create first tab in left frame- search by feature tab
-    def create_f_search_tab(self,containing_frame):
-        f_search_tab = Frame(containing_frame, bg=FRAME_BG, bd=3)
-        self.add(f_search_tab, text='Search By Country')
 
-        country_frame = Frame(f_search_tab, bg=FRAME_BG, bd=3)
-        country_frame.pack(expand=True, fill=X)
-        country_label = Label(country_frame, text="Country:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        #TODO JHONNY: fill list using query for all countries full name
-        country_list_items = ["Denmark", "France", "Germany", "Israel", "United States", "United Kingdom"]
-        country_filter_list = self.create_filter_list(country_frame, country_list_items)
 
-        self.create_buttom_part(f_search_tab)
+
 
     def create_radius_search_tab(self,containing_frame):
         radius_search_tab = Frame(containing_frame, bg=FRAME_BG, bd=3)
@@ -85,23 +122,3 @@ class SearchTabsNotebook(ttk.Notebook):
 
         self.create_buttom_part(radius_search_tab)
 
-    def create_buttom_part(self,containing_frame):
-        f_class_frame = Frame(containing_frame, bg=FRAME_BG, bd=3)
-        f_class_frame.pack(expand=True, fill=X)
-        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        # TODO JHONNY: fill list using query for all feature classes full name
-        f_class_list_items = ["country, state, region...", "stream, lake...", "parks,area..."]
-        f_class_filter_list = self.create_filter_list(f_class_frame, f_class_list_items)
-
-        f_code_frame = Frame(containing_frame, bg=FRAME_BG, bd=3)
-        f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        # TODO JHONNY: fill list using query for all feature codes full name that match the selected feature code
-        f_code_list_items = ["Will change according to the feature class"]
-        f_code_filter_list = self.create_filter_list(f_code_frame, f_code_list_items)
-
-        trip_filter = self.create_trip_filter(containing_frame)
-
-        # TODO JHONNY: query to get results using all filters and insert to locations_view
-        f_submit_button = Button(containing_frame, text="Search", width=20, command=lambda: None)
-        f_submit_button.pack(expand=True)

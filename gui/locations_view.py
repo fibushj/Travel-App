@@ -24,11 +24,14 @@ class LocationsView(ttk.Treeview):
         self.heading("6", text="Country", anchor=W)
         self.heading("7", text="Rating", anchor=W)
 
-        # TODO JHONNY: insert all results that match the user's input, in this format:
-        folder1 = self.insert("", 1, None, values=(
-            "Pic de Font Blanca", "42.64991", "1.53335", "...", "...", "Europe/Andorra", "4.5"))
         self.bind("<Double-1>", self.location_double_click)
         self.pack(expand=True, fill=BOTH)
+
+    def insert_row(self, row_values):
+        self.insert(parent="", index=1, iid=None, values=row_values)
+
+    def clear_table(self):
+        self.delete(*self.get_children())
 
     def location_double_click(self, event):
         item = self.selection()[0]

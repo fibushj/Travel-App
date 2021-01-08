@@ -17,7 +17,7 @@ def create_scrollable_frame(containing_frame):
     canvas.create_window((4, 4), window=scrollable_frame, anchor="nw")
 
     def onFrameConfigure(canvas):
-        '''Reset the scroll region to encompass the inner frame'''
+        # Reset the scroll region to encompass the inner frame
         canvas.configure(scrollregion=canvas.bbox("all"))
 
     scrollable_frame.bind("<Configure>", lambda event, canvas=canvas: onFrameConfigure(canvas))
@@ -31,7 +31,7 @@ def create_scrollable_frame(containing_frame):
 
 def create_review_box(containing_frame, reviewer_name, reviewer_birthday, trip_season, review_text):
     frame = Frame(containing_frame, bg='white', bd=0, highlightthickness=0)
-    frame.pack(expand=True, fill= BOTH)
+    frame.pack(expand=True, fill=BOTH)
 
     canvas = Canvas(frame, bg=FRAME_BG, width=50, height=50)
     canvas.create_text(8, 4, anchor=NW, fill="darkblue", font="Times 30 italic bold", text=reviewer_name[0])
@@ -42,14 +42,13 @@ def create_review_box(containing_frame, reviewer_name, reviewer_birthday, trip_s
     text.tag_configure("sender", font="Arial 15 bold")
     text.tag_configure("age", font="Arial 10")
     text.tag_configure("trip_season", font="Arial 8")
-    text.tag_configure("message", font=("Helvetica", "13"),lmargin1=15, lmargin2=15)
+    text.tag_configure("message", font=("Helvetica", "13"), lmargin1=15, lmargin2=15)
 
     text.insert("end", reviewer_name.title() + ' ', "sender")
     today = date.today()
-    reviewer_age= today.year - reviewer_birthday["year"] - ((today.month, today.day) < (reviewer_birthday["month"], reviewer_birthday["day"]))
+    reviewer_age = today.year - reviewer_birthday["year"] - (
+                (today.month, today.day) < (reviewer_birthday["month"], reviewer_birthday["day"]))
     text.insert("end", str(reviewer_age) + '\n', 'age')
-    text.insert("end", trip_season+'\n','trip_season')
+    text.insert("end", trip_season + '\n', 'trip_season')
     text.insert("end", '\n')
     text.insert("end", review_text + '\n\n', 'message')
-
-
