@@ -1,13 +1,69 @@
+SET @R=100; 
+set @earth_radius=6378;
+set @lat = 31.4117;
+set @lng = 35.0818;
+set @km_per_lat_degree = @earth_radius * PI() / 180;
+set @lat_delta = @R /@km_per_lat_degree;
+set @lng_delta = @lat_delta / COS(@lat * PI() / 180);
+SET @lat_min = @lat - @lat_delta;
+SET @lat_max = @lat + @lat_delta;
+SET @lng_min = @lng - @lng_delta;
+SET @lng_max = @lng + @lng_delta;
+
+ SELECT DISTINCT
+    l.name,
+    lat latitude,
+    lng longitude,
+    (SELECT 
+            fclass.name
+        FROM
+            feature_code fcode
+                JOIN
+            feature_class fclass ON fcode.feature_class = fclass.id
+        WHERE
+            fcode.id = l.feature_code) category,
+    (SELECT 
+            fcode.name
+        FROM
+            feature_code fcode
+        WHERE
+            fcode.id = l.feature_code) subcategory,
+    (SELECT 
+            c.name
+        FROM
+            country c
+        WHERE
+            c.id = l.country_code) country,
+    (SELECT 
+            AVG(rating)
+        FROM
+            review r
+        WHERE
+            r.place_id = l.id) avg_rating
+FROM
+    location l
+        JOIN
+    review r ON l.id = r.place_id
+WHERE
+    lat BETWEEN @lat_min AND @lat_max
+        AND lng BETWEEN @lng_min AND @lng_max
+        AND (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
+        AND feature_code = 'PPL'
+		;
+
+
+
+
 SET GLOBAL innodb_buffer_pool_size=268435456;
 ALTER TABLE location MODIFY COLUMN coordinates POINT;
 update location set coordinates=ST_GeomFromText(ST_AsText(Point(lat, lng)), 4326);
 ALTER TABLE location MODIFY COLUMN coordinates POINT SRID 4326 not null;
 ALTER TABLE location ADD INDEX(coordinates);
 
-SET @R=200; -- km
+SET @R=230; -- km
 set @earth_radius=6378;
-set @lat = 40.730610;
-set @lng = -73.935242; -- new york coordinates
+set @lat = 50.000000;
+set @lng = -72.935242; -- new york coordinates
 set @km_per_lat_degree = @earth_radius * PI() / 180;
 set @lat_delta = @R /@km_per_lat_degree;
 set @lng_delta = @lat_delta / COS(@lat * PI() / 180);
@@ -20,8 +76,8 @@ SELECT
      *,
      (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) AS distance
 FROM
-    location
-WHERE
+    location l
+WHERE feature_code = 'PPL' and
 	lat between @lat_min and @lat_max and lng between @lng_min and @lng_max 
 	and (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
 ;    
@@ -112,8 +168,8 @@ SET
 
 SELECT 
     l.name,
-    ST_X(coordinates) latitude,
-    ST_Y(coordinates) longitude,
+    lat latitude,
+    lng longitude,
     (SELECT 
             fclass.name
         FROM
@@ -128,7 +184,13 @@ SELECT
             feature_code fcode
         WHERE
             fcode.id = l.feature_code) subcategory,
-    c.name as country
+    c.name as country,
+     (SELECT 
+            AVG(rating)
+        FROM
+            review r
+        WHERE
+            r.place_id = l.id) avg_rating
 FROM
     location l
         JOIN
@@ -154,13 +216,19 @@ SELECT
             feature_code fcode
         WHERE
             fcode.id = l.feature_code) subcategory,
-    c.name as country
+    c.name as country,
+     (SELECT 
+            AVG(rating)
+        FROM
+            review r
+        WHERE
+            r.place_id = l.id) avg_rating
 FROM
     location l
         JOIN
     country c ON l.country_code = c.id
 WHERE
-    c.name = 'armenia'
+    c.name like 'isra__'
         AND feature_code = 'PPL';
 
 SELECT 
