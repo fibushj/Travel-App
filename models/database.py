@@ -1,8 +1,8 @@
 import mysql.connector
-#from os import O_NONBLOCK, system
+import models.queries.locations_screen as locations_screen
 from models.utils import execute_sql_file
 from models.config import *
-import random 
+import random
 import csv
 
 
@@ -13,7 +13,7 @@ class Database:
             autocommit=True
         )
         self.cursor = self.mydb.cursor()
-        
+
         # self.cursor.execute(f"""CREATE DATABASE {db_name}""")
         self.cursor.execute(f"USE {db_name}")
         # execute_sql_file(self.cursor, "models/initialization/tables_creation.sql")
@@ -23,20 +23,54 @@ class Database:
         # self.populate_users()
         # self.generate_reviews()
         self.cursor.execute(f"USE {db_name}")
+        self.cursor.execute(f""" 
+        LOAD DATA INFILE '{reviews_path}'
+        IGNORE INTO TABLE review
+        FIELDS TERMINATED BY ','
+        enclosed by ''
+        LINES TERMINATED BY '\r\n' 
+        (user_id, place_id, rating, trip_type, trip_season, anonymous_review, review); 
+        """)
 
-
-        
-    def close(self): #TODO call it
+    def close(self):  # TODO call it
         self.cursor.close()
         self.mydb.close()
 
-
-    
-    def locations_by_countries(cursor, fclass, fcode, trip_type, trip_season):
-    #TODO type, season can be 'ALL'
-        return NotImplemented
-
-
+    def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season):
+        # TODO type, season can be 'ALL'
+        if country_name=="":
+            locations_screen.geospatial_preprocessing(radius, lat, lng)
+        query = ""
+        query += locations_screen.select()
+        if country_name != "":
+            query += locations_screen.from_country()
+        else:
+            query += """FROM location l
+            """
+        # add reviews
+        if country_name != "":
+            query += f"""WHERE c.name = '{country_name}'
+            """
+        else:
+            query+=locations_screen.where_radius()
+        if fclass != "":
+            if fcode != "":
+                query += f"""AND feature_code = '{fcode}'
+                """
+            else:
+                query+=f"""AND feature_code IN (SELECT 
+                                fcode.id
+                            FROM
+                                feature_code fcode
+                                    JOIN
+                                feature_class fclass ON fcode.feature_class = fclass.id
+                            WHERE
+                                fclass.name = '{fclass}')
+                """
+        print(query)  # maybe add ;
+        self.cursor.execute(query)
+        res = self.cursor.fetchall()
+        print(res)
 
     def populate_tables(self):
         self.cursor.execute(f"""
@@ -48,7 +82,6 @@ class Database:
         IGNORE 1 LINES
         (id, name);      
         """)
-
 
         self.cursor.execute(f"""
         LOAD DATA INFILE '{feature_codes_path}'
@@ -108,9 +141,9 @@ class Database:
         (user_id, place_id, rating, trip_type, trip_season, anonymous_review, review); 
         """)
 
-
     def populate_users(self):
-        command = [f'INSERT INTO {db_name}.user(full_name, email, password, date_of_birth) VALUES']
+        command = [
+            f'INSERT INTO {db_name}.user(full_name, email, password, date_of_birth) VALUES']
         first_names = []
         last_names = []
 
@@ -129,8 +162,9 @@ class Database:
                 email = f"{l_name}.{f_name}@gmail.com"
                 password = "123456"
                 date_of_birth = self.generate_date()
-                command.extend([f"('{full_name}', '{email}', '{password}', '{date_of_birth}')", ", "])
-        
+                command.extend(
+                    [f"('{full_name}', '{email}', '{password}', '{date_of_birth}')", ", "])
+
         command[-1] = ';'
         self.cursor.execute("".join(command))
         print("done")
@@ -138,31 +172,30 @@ class Database:
     def generate_date(self):
         return f"{random.randint(1965, 2005)}-{random.randint(1, 12)}-{random.randint(1, 28)}"
 
-
-
-
     def generate_reviews(self):
-        self.cursor.execute('SELECT * FROM location WHERE country_code = "IL";')
+        self.cursor.execute(
+            'SELECT * FROM location WHERE country_code = "IL";')
         records = self.cursor.fetchall()
-        self.write_reviews_set(records, [6,10], [0, 40], [0, 10000])
-        self.write_reviews_set(records, [1,5], [0, 8], [10001, 20000])
-
+        self.write_reviews_set(records, [6, 10], [0, 40], [0, 10000])
+        self.write_reviews_set(records, [1, 5], [0, 8], [10001, 20000])
 
     def write_reviews_set(self, places_list, ratings_range, reviews_range, users_range):
         with open('reviews.csv', 'a', newline='') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            text_review = ["Terrible place", "Nothing remarkable", "Waste of time", "Not bad at all", "Had a lot of fun", "The best place in the whole world"]
+            writer = csv.writer(csvfile, delimiter=',',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            text_review = ["Terrible place", "Nothing remarkable", "Waste of time",
+                           "Not bad at all", "Had a lot of fun", "The best place in the whole world"]
 
             for place_row in places_list:
-                rewievs_num = random.randint(reviews_range[0], reviews_range[1])
+                rewievs_num = random.randint(
+                    reviews_range[0], reviews_range[1])
                 user_id = random.randint(users_range[0], users_range[1])
                 location_id = place_row[0]
                 for _ in range(rewievs_num):
-                    is_anonimous = random.randint(0,1)
+                    is_anonimous = random.randint(0, 1)
                     trip_type_id = random.randint(1, 10)
                     trip_season_id = random.randint(1, 4)
                     user_id += 1
                     rating = random.randint(ratings_range[0], ratings_range[1])
-                    writer.writerow([user_id, location_id, rating, trip_type_id, trip_season_id, is_anonimous, text_review[rating//2]])
-        
-
+                    writer.writerow([user_id, location_id, rating, trip_type_id,
+                                     trip_season_id, is_anonimous, text_review[rating//2]])
