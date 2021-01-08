@@ -37,28 +37,98 @@ class Database:
         self.mydb.close()
 
     def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season):
-        # TODO type, season can be 'ALL'
-        if country_name=="":
-            locations_screen.geospatial_preprocessing(radius, lat, lng)
         query = ""
-        query += locations_screen.select()
+        # TODO type, season can be 'ALL'
+        if country_name == "":
+            query += f""" 
+                SET @R={radius};
+                SET @earth_radius = 6378;
+                SET @lat = {lat};
+                SET @lng = {lng};
+                SET @km_per_lat_degree = @earth_radius * PI() / 180;
+                SET @lat_delta = @R /@km_per_lat_degree;
+                SET @lng_delta = @lat_delta / COS(@lat * PI() / 180);
+                SET @lat_min = @lat - @lat_delta;
+                SET @lat_max = @lat + @lat_delta;
+                SET @lng_min = @lng - @lng_delta;
+                SET @lng_max = @lng + @lng_delta;
+                """
+            #locations_screen.geospatial_preprocessing(radius, lat, lng)
+
+        review_conditions =""
+        if trip_season!="":
+            review_conditions += """
+                    AND r.trip_season = (select id from trip_season where name = '{trip_season}')
+                    """
+        if trip_type!="":
+            review_conditions += """
+                    AND r.trip_type = (select id from trip_type where name = '{trip_type}')
+                    """   
+
+        query += """
+                SELECT DISTINCT
+                    l.name,
+                    lat latitude,
+                    lng longitude,
+                    (SELECT 
+                            fclass.name
+                        FROM
+                            feature_code fcode
+                                JOIN
+                            feature_class fclass ON fcode.feature_class = fclass.id
+                        WHERE
+                            fcode.id = l.feature_code) category,
+                    (SELECT 
+                            fcode.name
+                        FROM
+                            feature_code fcode
+                        WHERE
+                            fcode.id = l.feature_code) subcategory,
+                    (SELECT 
+                            c.name
+                        FROM
+                            country c
+                        WHERE
+                            c.id = l.country_code) country,
+                    (SELECT 
+                            AVG(rating)
+                        FROM
+                            review r
+                        WHERE
+                            r.place_id = l.id
+                            {review_conditions}
+                            ) average rating
+                """
         if country_name != "":
-            query += locations_screen.from_country()
+            query += """
+                    FROM
+                        location l
+                            JOIN
+                        country c ON l.country_code = c.id
+                    """
         else:
-            query += """FROM location l
+            query += """
+            FROM location l
             """
-        # add reviews
+        query += """
+                    JOIN
+                review r ON l.id = r.place_id
+                """
         if country_name != "":
             query += f"""WHERE c.name = '{country_name}'
             """
         else:
-            query+=locations_screen.where_radius()
+            query += """
+                    WHERE
+                    lat between @lat_min and @lat_max and lng between @lng_min and @lng_max 
+                    and (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
+                    """
         if fclass != "":
             if fcode != "":
                 query += f"""AND feature_code = '{fcode}'
                 """
             else:
-                query+=f"""AND feature_code IN (SELECT 
+                query += f"""AND feature_code IN (SELECT 
                                 fcode.id
                             FROM
                                 feature_code fcode
@@ -67,10 +137,17 @@ class Database:
                             WHERE
                                 fclass.name = '{fclass}')
                 """
-        print(query)  # maybe add ;
+             
+        query+=review_conditions
+        query += """
+                ORDER BY id
+                """
+        # add where id>last_id
+        query+=';'
+        print(query)  
         self.cursor.execute(query)
         res = self.cursor.fetchall()
-        print(res)
+        return res
 
     def populate_tables(self):
         self.cursor.execute(f"""

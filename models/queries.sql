@@ -33,13 +33,17 @@ SET @lng_max = @lng + @lng_delta;
         FROM
             country c
         WHERE
-            c.id = l.country_code) country,
-    (SELECT 
-            AVG(rating)
-        FROM
-            review r
-        WHERE
-            r.place_id = l.id) avg_rating
+            c.id = l.country_code) country
+             ,
+     (SELECT 
+             AVG(rating)
+         FROM
+             review r
+         WHERE
+             r.place_id = l.id
+             AND r.trip_season = (select id from trip_season where name = 'spring')
+	 		AND r.trip_type = (select id from trip_type where name = 'nightlife')
+             ) avg_rating
 FROM
     location l
         JOIN
@@ -48,7 +52,9 @@ WHERE
     lat BETWEEN @lat_min AND @lat_max
         AND lng BETWEEN @lng_min AND @lng_max
         AND (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
-        AND feature_code = 'PPL'
+      AND r.trip_season = (select id from trip_season where name = 'spring')
+      AND r.trip_type = (select id from trip_type where name = 'nightlife')
+      order by id
 		;
 
 
@@ -196,8 +202,9 @@ FROM
         JOIN
     country c ON l.country_code = c.id
 WHERE
-    c.name = 'israel';
-
+    c.name = 'israel'
+   and feature_code='bnkr'
+;
 SELECT 
     l.name,
     ST_X(coordinates) latitude,
