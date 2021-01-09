@@ -1,4 +1,3 @@
-import mysql.connector
 from models.database import Database
 from controller.utils import generateErrorMessage
 
@@ -8,41 +7,50 @@ class DataBaseManager:
         self.database = database
         self.user_logged_in = False
         self.user_data = None
+        self.last_locations_id = 0
+        self.last_location_data = None
+        self.last_location_reviews_id = 0
+        self.last_review_data = None
 
 
 
     ### - FETCH OVERALL DATA FUNCTIONS
     def fetchCountries(self):
         try:
-            result = self.database.fetchCountries()
+            countries = self.database.fetchCountries()
+            result = [i[1] for i in countries]
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
     def fetchFeatureClasses(self):
         try:
-            result = self.database.fetchFeatureClasses()
+            classes = self.database.fetchFeatureClasses()
+            result = [i[1] for i in classes]
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
-    def fetchFeatureCodes(self):
+    def fetchFeatureCodes(self, feature_class_name):
         try:
-            result = self.database.fetchFeatureCodes()
+            codes = self.database.fetchFeatureCodes(feature_class_name)
+            result = [i[2] for i in codes]
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
     def fetchTripSeasons(self):
         try:
-            result = self.database.fetchTripSeasons()
+            seasons = self.database.fetchTripSeasons()
+            result = [i[1] for i in seasons]
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
     def fetchTripTypes(self):
         try:
-            result = self.database.fetchTripTypes()
+            types = self.database.fetchTripTypes()
+            result = [i[1] for i in types]
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
@@ -168,3 +176,25 @@ class DataBaseManager:
     #             return False, generateErrorMessage(err.args[0])
 
 
+    def searchLocations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size):
+        try:
+            result = self.database.find_locations(country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size)
+            self.last_location_data = [country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season]
+            self.last_locations_id = len(result)
+            return result, None
+        except Exception as err:
+                return None, generateErrorMessage(err.args[0])
+
+
+    def proceedLastSearchQuery(self, limit_size):
+        if self.last_location_data == None:
+            return None, "You haven't yet searched nothing"
+        
+        try:
+            result = self.database.find_locations(self.last_location_data[0], self.last_location_data[1], self.last_location_data[2], 
+                            self.last_location_data[3], self.last_location_data[4], self.last_location_data[5], 
+                            self.last_location_data[6], self.last_location_data[7], limit_size)
+            self.last_locations_id += len(result)
+            return result, None
+        except Exception as err:
+                return False, generateErrorMessage(err.args[0])

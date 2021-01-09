@@ -23,22 +23,13 @@ class Database:
         # self.populate_users()
         # self.generate_reviews()
         self.cursor.execute(f"USE {db_name}")
-        self.cursor.execute(f""" 
-        LOAD DATA INFILE '{reviews_path}'
-        IGNORE INTO TABLE review
-        FIELDS TERMINATED BY ','
-        enclosed by ''
-        LINES TERMINATED BY '\r\n' 
-        (user_id, place_id, rating, trip_type, trip_season, anonymous_review, review); 
-        """)
 
-    def close(self):  # TODO call it
+    def close(self):
         self.cursor.close()
         self.mydb.close()
 
     def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size, last_id=0):
         query = ""
-        # TODO type, season can be 'ALL'
         if country_name == "":
             query += f""" 
                 SET @R={radius};
@@ -55,17 +46,17 @@ class Database:
                 """
 
         review_ignored_values = ["", "All"]
-        review_conditions =""
+        review_conditions = ""
         if trip_season not in review_ignored_values:
-            review_conditions += """
+            review_conditions += f"""
                     AND r.trip_season = (select id from trip_season where name = '{trip_season}')
                     """
         if trip_type not in review_ignored_values:
-            review_conditions += """
+            review_conditions += f"""
                     AND r.trip_type = (select id from trip_type where name = '{trip_type}')
-                    """   
+                    """
 
-        query += """
+        query += f"""
                 SELECT DISTINCT
                     l.name,
                     lat latitude,
@@ -137,14 +128,79 @@ class Database:
                             WHERE
                                 fclass.name = '{fclass}')
                 """
-             
-        query+=review_conditions
-        query += """
+
+        query += review_conditions
+        query += f"""
                 AND l.id > {last_id}
                 ORDER BY id limit {limit_size}
                 ;
                 """
-        print(query)  
+        return self.execute_query(query)
+
+    def highest_rated_locations(self):
+        query = """
+                SELECT 
+                    l.name,
+                    lat latitude,
+                    lng longitude,
+                    (SELECT 
+                            fclass.name
+                        FROM
+                            feature_code fcode
+                                JOIN
+                            feature_class fclass ON fcode.feature_class = fclass.id
+                        WHERE
+                            fcode.id = l.feature_code) category,
+                    (SELECT 
+                            fcode.name
+                        FROM
+                            feature_code fcode
+                        WHERE
+                            fcode.id = l.feature_code) subcategory,
+                    (SELECT 
+                            c.name
+                        FROM
+                            country c
+                        WHERE
+                            c.id = l.country_code) country,
+                    temp.average_rating average_rating
+                FROM
+                    location l
+                        JOIN
+                    (SELECT 
+                        place_id, AVG(rating) average_rating
+                    FROM
+                        review
+                    GROUP BY place_id
+                    ORDER BY average_rating DESC
+                    LIMIT 20) temp ON l.id = temp.place_id;
+            """
+        return self.execute_query(query)
+
+    def global_statistics(self):
+        query = """
+                SELECT 
+                    trip_season,
+                    trip_type,
+                    FLOOR(YEAR(CURRENT_TIMESTAMP) - AVG(year_of_birth)) average_age
+                FROM
+                    (SELECT 
+                        YEAR(date_of_birth) year_of_birth,
+                            ttype.name trip_type,
+                            tseason.name trip_season
+                    FROM
+                        trip_type ttype
+                    JOIN review r ON ttype.id = r.trip_type
+                    JOIN trip_season tseason ON tseason.id = r.trip_season
+                    JOIN user u ON r.user_id = u.id
+                    GROUP BY u.id , ttype.id , tseason.id) temp
+                GROUP BY trip_type , trip_season
+                ORDER BY trip_season , trip_type;
+                """
+        return self.execute_query(query)
+
+    def execute_query(self, query):
+        print(query)
         self.cursor.execute(query)
         res = self.cursor.fetchall()
         return res
@@ -160,8 +216,10 @@ class Database:
         self.cursor.execute("SELECT * FROM feature_class;")
         return self.cursor.fetchall()
 
-    def fetchFeatureCodes(self):
-        self.cursor.execute("SELECT * FROM feature_code;")
+    def fetchFeatureCodes(self, feature_class_name):
+        self.cursor.execute(f"SELECT id FROM feature_class WHERE name = '{feature_class_name}';")
+        feature_class_id = self.cursor.fetchall()[0][0]
+        self.cursor.execute(f"SELECT * FROM feature_code WHERE feature_class = '{feature_class_id}';")
         return self.cursor.fetchall()
 
     def fetchTripSeasons(self):
