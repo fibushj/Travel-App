@@ -32,13 +32,12 @@ class Database:
         (user_id, place_id, rating, trip_type, trip_season, anonymous_review, review); 
         """)
 
-    def close(self):  # TODO call it
+    def close(self): 
         self.cursor.close()
         self.mydb.close()
 
     def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size, last_id=0):
         query = ""
-        # TODO type, season can be 'ALL'
         if country_name == "":
             query += f""" 
                 SET @R={radius};
@@ -144,10 +143,80 @@ class Database:
                 ORDER BY id limit {limit_size}
                 ;
                 """
+        return self.execute_query(query)
+
+
+    def highest_rated_locations(self):
+        query = """
+                SELECT 
+                    l.name,
+                    lat latitude,
+                    lng longitude,
+                    (SELECT 
+                            fclass.name
+                        FROM
+                            feature_code fcode
+                                JOIN
+                            feature_class fclass ON fcode.feature_class = fclass.id
+                        WHERE
+                            fcode.id = l.feature_code) category,
+                    (SELECT 
+                            fcode.name
+                        FROM
+                            feature_code fcode
+                        WHERE
+                            fcode.id = l.feature_code) subcategory,
+                    (SELECT 
+                            c.name
+                        FROM
+                            country c
+                        WHERE
+                            c.id = l.country_code) country,
+                    temp.average_rating average_rating
+                FROM
+                    location l
+                        JOIN
+                    (SELECT 
+                        place_id, AVG(rating) average_rating
+                    FROM
+                        review
+                    GROUP BY place_id
+                    ORDER BY average_rating DESC
+                    LIMIT 20) temp ON l.id = temp.place_id;
+            """
+        return self.execute_query(query)
+
+    def global_statistics(self):
+        query = """
+                SELECT 
+                    trip_season,
+                    trip_type,
+                    FLOOR(YEAR(CURRENT_TIMESTAMP) - AVG(year_of_birth)) average_age
+                FROM
+                    (SELECT 
+                        YEAR(date_of_birth) year_of_birth,
+                            ttype.name trip_type,
+                            tseason.name trip_season
+                    FROM
+                        trip_type ttype
+                    JOIN review r ON ttype.id = r.trip_type
+                    JOIN trip_season tseason ON tseason.id = r.trip_season
+                    JOIN user u ON r.user_id = u.id
+                    GROUP BY u.id , ttype.id , tseason.id) temp
+                GROUP BY trip_type , trip_season
+                ORDER BY trip_season , trip_type;
+                """
+        return self.execute_query(query)
+
+
+    def execute_query(self, query):
         print(query)  
         self.cursor.execute(query)
         res = self.cursor.fetchall()
         return res
+
+# ------------------------------------------------------------
+
 
     def populate_tables(self):
         self.cursor.execute(f"""
