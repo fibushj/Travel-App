@@ -11,7 +11,81 @@ SET @lng_min = @lng - @lng_delta;
 SET @lng_max = @lng + @lng_delta;
 
 
-select (select avg(5))average_age from trip_type group by name;
+SELECT 
+    l.name,
+    lat latitude,
+    lng longitude,
+    (SELECT 
+            fclass.name
+        FROM
+            feature_code fcode
+                JOIN
+            feature_class fclass ON fcode.feature_class = fclass.id
+        WHERE
+            fcode.id = l.feature_code) category,
+    (SELECT 
+            fcode.name
+        FROM
+            feature_code fcode
+        WHERE
+            fcode.id = l.feature_code) subcategory,
+    (SELECT 
+            c.name
+        FROM
+            country c
+        WHERE
+            c.id = l.country_code) country,
+    temp.average_rating average_rating
+FROM
+    location l
+        JOIN
+    (SELECT 
+        place_id, AVG(rating) average_rating
+    FROM
+        review
+    GROUP BY place_id
+    ORDER BY average_rating DESC
+    LIMIT 20) temp ON l.id = temp.place_id
+;
+
+SELECT 
+    trip_season,
+    trip_type,
+    FLOOR(YEAR(CURRENT_TIMESTAMP) - AVG(year_of_birth)) average_age
+FROM
+    (SELECT 
+        YEAR(date_of_birth) year_of_birth,
+            ttype.name trip_type,
+            tseason.name trip_season
+    FROM
+        trip_type ttype
+    JOIN review r ON ttype.id = r.trip_type
+    JOIN trip_season tseason ON tseason.id = r.trip_season
+    JOIN user u ON r.user_id = u.id
+    GROUP BY u.id , ttype.id , tseason.id) temp
+GROUP BY trip_type , trip_season
+ORDER BY trip_season , trip_type;
+
+
+SELECT 
+    (SELECT 
+            name
+        FROM
+            trip_type
+        WHERE
+            id = ttype) trip_type,
+    FLOOR(YEAR(CURRENT_TIMESTAMP) - AVG(year_of_birth)) average_age
+FROM
+    (SELECT DISTINCT
+        u.id, YEAR(date_of_birth) year_of_birth, r.trip_type ttype
+    FROM
+        trip_type ttype
+    JOIN review r ON ttype.id = r.trip_type
+    JOIN user u ON r.user_id = u.id) temp
+GROUP BY ttype
+ORDER BY average_age;
+
+
 
 
  SELECT DISTINCT

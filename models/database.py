@@ -36,7 +36,7 @@ class Database:
         self.cursor.close()
         self.mydb.close()
 
-    def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season):
+    def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size, last_id=0):
         query = ""
         # TODO type, season can be 'ALL'
         if country_name == "":
@@ -53,14 +53,14 @@ class Database:
                 SET @lng_min = @lng - @lng_delta;
                 SET @lng_max = @lng + @lng_delta;
                 """
-            #locations_screen.geospatial_preprocessing(radius, lat, lng)
 
+        review_ignored_values = ["", "All"]
         review_conditions =""
-        if trip_season!="":
+        if trip_season not in review_ignored_values:
             review_conditions += """
                     AND r.trip_season = (select id from trip_season where name = '{trip_season}')
                     """
-        if trip_type!="":
+        if trip_type not in review_ignored_values:
             review_conditions += """
                     AND r.trip_type = (select id from trip_type where name = '{trip_type}')
                     """   
@@ -140,10 +140,10 @@ class Database:
              
         query+=review_conditions
         query += """
-                ORDER BY id
+                AND l.id > {last_id}
+                ORDER BY id limit {limit_size}
+                ;
                 """
-        # add where id>last_id
-        query+=';'
         print(query)  
         self.cursor.execute(query)
         res = self.cursor.fetchall()
