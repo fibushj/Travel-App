@@ -149,6 +149,67 @@ class Database:
         res = self.cursor.fetchall()
         return res
 
+
+    # Function added by Anton
+    # Those are simple functions that fetch necessary data for gui 
+    def fetchCountries(self):
+        self.cursor.execute("SELECT * FROM country;")
+        return self.cursor.fetchall()
+
+    def fetchFeatureClasses(self):
+        self.cursor.execute("SELECT * FROM feature_class;")
+        return self.cursor.fetchall()
+
+    def fetchFeatureCodes(self):
+        self.cursor.execute("SELECT * FROM feature_code;")
+        return self.cursor.fetchall()
+
+    def fetchTripSeasons(self):
+        self.cursor.execute("SELECT * FROM trip_season;")
+        return self.cursor.fetchall()
+
+    def fetchTripTypes(self):
+        self.cursor.execute("SELECT * FROM trip_type;")
+        return self.cursor.fetchall()
+
+    def fetchLocationReviews(self, location_id, limit):
+        self.cursor.execute(f"SELECT * FROM review WHERE place_id = {location_id} LIMIT {limit};")
+        return self.cursor.fetchall()
+
+    def fetchUserReviews(self, user_id, limit):
+        self.cursor.execute(f"SELECT * FROM review WHERE user_id = {user_id} LIMIT {limit};")
+        return self.cursor.fetchall()
+
+    # Those are functions needed for users handling
+    def checkUserExistence(self, email, password):
+        self.cursor.execute(f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
+        query_result = self.cursor.fetchall()
+        return query_result
+
+    def checkEmailExistence(self, email):
+        self.cursor.execute(f"SELECT COUNT(*) FROM user WHERE email = '{email}';")
+        query_result = self.cursor.fetchall()[0][0]
+        return query_result
+
+    def enterNewUser(self, full_name, email, password, birth_date):
+        self.cursor.execute(f"""INSERT INTO user(full_name, email, password, date_of_birth) 
+                        VALUES('{full_name}', '{email}', '{password}', '{birth_date}');""")
+
+
+    def countSpecificUserReviews(self, user_id, place_id, season_id):
+        self.cursor.execute(f"""SELECT COUNT(*) FROM review WHERE user_id = {user_id} 
+                                    AND place_id = {place_id} AND trip_season = {season_id};""")
+        return self.cursor.fetchall()[0][0]
+
+    def deleteUserReview(self, user_id, place_id, season_id):
+        self.cursor.execute(f"""DELETE FROM review WHERE user_id = {user_id} 
+                                    AND place_id = {place_id} AND trip_season = {season_id};""")
+
+    def addUserReview(self, user_id, place_id, rating, trip_type, trip_season, anon_rew, text_rew):
+        self.cursor.execute(f"""INSERT INTO review VALUES ({user_id},  {place_id}, 
+                                    {rating}, {trip_type}, {trip_season}, {anon_rew}, '{text_rew}');""")
+
+    # Functions for initial data base initialization
     def populate_tables(self):
         self.cursor.execute(f"""
         LOAD DATA INFILE '{feature_classes_path}'
