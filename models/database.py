@@ -23,16 +23,8 @@ class Database:
         # self.populate_users()
         # self.generate_reviews()
         self.cursor.execute(f"USE {db_name}")
-        self.cursor.execute(f""" 
-        LOAD DATA INFILE '{reviews_path}'
-        IGNORE INTO TABLE review
-        FIELDS TERMINATED BY ','
-        enclosed by ''
-        LINES TERMINATED BY '\r\n' 
-        (user_id, place_id, rating, trip_type, trip_season, anonymous_review, review); 
-        """)
 
-    def close(self): 
+    def close(self):
         self.cursor.close()
         self.mydb.close()
 
@@ -54,17 +46,17 @@ class Database:
                 """
 
         review_ignored_values = ["", "All"]
-        review_conditions =""
+        review_conditions = ""
         if trip_season not in review_ignored_values:
-            review_conditions += """
+            review_conditions += f"""
                     AND r.trip_season = (select id from trip_season where name = '{trip_season}')
                     """
         if trip_type not in review_ignored_values:
-            review_conditions += """
+            review_conditions += f"""
                     AND r.trip_type = (select id from trip_type where name = '{trip_type}')
-                    """   
+                    """
 
-        query += """
+        query += f"""
                 SELECT DISTINCT
                     l.name,
                     lat latitude,
@@ -136,15 +128,14 @@ class Database:
                             WHERE
                                 fclass.name = '{fclass}')
                 """
-             
-        query+=review_conditions
-        query += """
+
+        query += review_conditions
+        query += f"""
                 AND l.id > {last_id}
                 ORDER BY id limit {limit_size}
                 ;
                 """
         return self.execute_query(query)
-
 
     def highest_rated_locations(self):
         query = """
@@ -208,15 +199,13 @@ class Database:
                 """
         return self.execute_query(query)
 
-
     def execute_query(self, query):
-        print(query)  
+        print(query)
         self.cursor.execute(query)
         res = self.cursor.fetchall()
         return res
 
 # ------------------------------------------------------------
-
 
     def populate_tables(self):
         self.cursor.execute(f"""
