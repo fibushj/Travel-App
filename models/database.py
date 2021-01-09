@@ -116,8 +116,13 @@ class Database:
                     """
         if fclass != "":
             if fcode != "":
-                query += f"""AND feature_code = '{fcode}'
-                """
+                query += f"""AND l.feature_code = (SELECT 
+                                id
+                            FROM
+                                feature_code
+                            WHERE
+                                name ='{fcode}'
+                        """
             else:
                 query += f"""AND feature_code IN (SELECT 
                                 fcode.id
