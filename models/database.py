@@ -138,7 +138,7 @@ class Database:
         query += review_conditions
         query += f"""
                 AND l.id > {last_id}
-                ORDER BY id limit {limit_size}
+                ORDER BY l.id limit {limit_size}
                 ;
                 """
         return self.execute_query(query)
