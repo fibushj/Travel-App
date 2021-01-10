@@ -58,6 +58,7 @@ class Database:
 
         query += f"""
                 SELECT DISTINCT
+                    l.id,
                     l.name,
                     lat latitude,
                     lng longitude,
@@ -202,6 +203,42 @@ class Database:
                 GROUP BY trip_type , trip_season
                 ORDER BY trip_season , trip_type;
                 """
+        return self.execute_query(query)
+
+    def trip_season_statistics_per_location(self, location_id):
+        query=f"""
+                SELECT 
+                    (SELECT 
+                            name
+                        FROM
+                            trip_season tseason
+                        WHERE
+                            id = trip_season) trip_season,
+                    COUNT(*) num_reviews
+                FROM
+                    review
+                WHERE
+                    place_id = {location_id}
+                GROUP BY trip_season;
+            """
+        return self.execute_query(query)
+
+    def trip_type_statistics_per_location(self, location_id):
+        query=f"""
+                SELECT 
+                    (SELECT 
+                            name
+                        FROM
+                            trip_type ttype
+                        WHERE
+                            id = trip_type) trip_type,
+                    COUNT(*) num_reviews
+                FROM
+                    review
+                WHERE
+                    place_id = {location_id}
+                GROUP BY trip_type;
+            """
         return self.execute_query(query)
 
     def execute_query(self, query):

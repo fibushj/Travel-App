@@ -11,7 +11,15 @@ SET @lng_min = @lng - @lng_delta;
 SET @lng_max = @lng + @lng_delta;
 
 
+
+
+
+select (select name from trip_season tseason where id=trip_season) trip_season, count(*) num_reviews from review where place_id=8542111 group by trip_season;
+select (select name from trip_type ttype where id=trip_type) trip_type, count(*) num_reviews from review where place_id=8542111 group by trip_type;
+
+
 SELECT 
+	l.id,
     l.name,
     lat latitude,
     lng longitude,
@@ -268,8 +276,8 @@ SELECT
             feature_code fcode
         WHERE
             fcode.id = l.feature_code) subcategory,
-    c.name as country,
-     (SELECT 
+    c.name AS country,
+    (SELECT 
             AVG(rating)
         FROM
             review r
@@ -281,7 +289,12 @@ FROM
     country c ON l.country_code = c.id
 WHERE
     c.name = 'israel'
-   and feature_code='bnkr'
+        AND l.feature_code = (SELECT 
+            id
+        FROM
+            feature_code
+        WHERE
+            name = 'populated place')
 ;
 SELECT 
     l.name,
