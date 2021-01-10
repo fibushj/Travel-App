@@ -8,8 +8,8 @@ from models.config import *
 db = Database()
 db.initialize()
 fclass, fcode, trip_type, trip_season = "A", "PPL", "", ""
-db.find_locations(country_name="", radius = 2, lat=32.109333, lng=34.855499, fclass=fclass, fcode=fcode, trip_type=trip_type, trip_season=trip_season)
-db_manager = DataBaseManager()
+#db.find_locations(country_name="", radius = 2, lat=32.109333, lng=34.855499, fclass=fclass, fcode=fcode, trip_type=trip_type, trip_season=trip_season)
+db_manager = DataBaseManager(db)
 gui = MainGUI(db_manager)
 gui.run()
-# db.close()
+db.close()
