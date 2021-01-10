@@ -45,7 +45,7 @@ class Database:
                 SET @lng_max = @lng + @lng_delta;
                 """
 
-        review_ignored_values = ["", "All"]
+        review_ignored_values = ["", "All", "Trip type", "Trip season"]
         review_conditions = ""
         if trip_season not in review_ignored_values:
             review_conditions += f"""
