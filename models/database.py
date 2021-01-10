@@ -272,12 +272,23 @@ class Database:
         self.cursor.execute("SELECT * FROM trip_type;")
         return self.cursor.fetchall()
 
-    def fetchLocationReviews(self, location_id, limit):
-        self.cursor.execute(f"SELECT * FROM review WHERE place_id = {location_id} LIMIT {limit};")
-        return self.cursor.fetchall()
+    def fetchReviews(self, limit=50, location_id=-1, user_id=-1):
+        command = "SELECT * FROM review WHERE "
 
-    def fetchUserReviews(self, user_id, limit):
-        self.cursor.execute(f"SELECT * FROM review WHERE user_id = {user_id} LIMIT {limit};")
+        if (location_id == -1 and user_id == -1):
+            raise Exception("Have to provide user id or location id")
+        elif (location_id != -1 and user_id == -1):
+            command += f"place_id = {location_id} LIMIT {limit}"
+        elif (location_id == -1 and user_id != -1):
+            command += f"user_id = {user_id} LIMIT {limit}"
+        else:
+            command += f"user_id = {user_id} AND place_id = {location_id} LIMIT {limit}"
+
+        command_seasons = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
+                                FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
+        command_types = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
+                                FROM ({command_seasons}) as l INNER JOIN trip_type as r ON l.trip_type = r.id"""
+        self.cursor.execute(command_types)
         return self.cursor.fetchall()
 
     # Those are functions needed for users handling

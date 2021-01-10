@@ -8,7 +8,7 @@ class DataBaseManager:
         self.user_logged_in = False
         self.user_data = None
         self.last_locations_id = 0
-        self.last_location_data = None
+        self.last_locations_query_data = None
         self.last_location_reviews_id = 0
         self.last_review_data = None
 
@@ -58,7 +58,7 @@ class DataBaseManager:
 
     def fetchLocationReviews(self, location_id, limit):
         try:
-            result = self.database.fetchLocationReviews(location_id, limit)
+            result = self.database.fetchReviews(location_id=location_id, limit=limit)
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
@@ -116,7 +116,7 @@ class DataBaseManager:
     def getCurrentUserReviews(self, limit):
         try:
             if self.user_logged_in:
-                result = self.database.fetchUserReviews(self.user_data[0], limit)
+                result = self.database.fetchReviews(user_id=self.user_data[0], limit=limit)
                 return result, None
             else:
                 return None, "You had not logged in"
@@ -179,22 +179,22 @@ class DataBaseManager:
     def searchLocations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size):
         # try:
         result = self.database.find_locations(country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size)
-        self.last_location_data = [country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season]
-        self.last_locations_id = len(result)
+        self.last_locations_query_data = [country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season]
+        self.last_locations_id = result[len(result)-1][0]
         return result, None
         # except Exception as err:
         #         return None, generateErrorMessage(err.args[0])
 
 
     def proceedLastSearchQuery(self, limit_size):
-        if self.last_location_data == None:
+        if self.last_locations_query_data == None:
             return None, "You haven't yet searched nothing"
         
         try:
-            result = self.database.find_locations(self.last_location_data[0], self.last_location_data[1], self.last_location_data[2], 
-                            self.last_location_data[3], self.last_location_data[4], self.last_location_data[5], 
-                            self.last_location_data[6], self.last_location_data[7], limit_size)
-            self.last_locations_id += len(result)
+            result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
+                            self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
+                            self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size)
+            self.last_locations_id = result[len(result)-1][0]
             return result, None
         except Exception as err:
                 return False, generateErrorMessage(err.args[0])
