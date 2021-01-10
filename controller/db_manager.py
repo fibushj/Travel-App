@@ -179,6 +179,9 @@ class DataBaseManager:
     def searchLocations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size):
         # try:
         result = self.database.find_locations(country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size)
+        if len(result == 0):
+            return [], None
+
         self.last_locations_query_data = [country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season]
         self.last_locations_id = result[len(result)-1][0]
         return result, None
@@ -194,6 +197,8 @@ class DataBaseManager:
             result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
                             self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
                             self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size)
+            if len(result == 0):
+                return [], None
             self.last_locations_id = result[len(result)-1][0]
             return result, None
         except Exception as err:
