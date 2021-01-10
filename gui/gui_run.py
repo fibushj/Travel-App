@@ -33,7 +33,7 @@ class MainGUI:
         left_frame = Frame(self.window, bg=FRAME_BG, bd=3)
         left_frame.place(relx=0, rely=0, relwidth=0.2, relheight=1)
         # Create Tab Control
-        left_tabs_control = SearchTabsNotebook(left_frame, db_manager, self.locations_view)
+        left_tabs_control = SearchTabsNotebook(left_frame, db_manager, self.locations_view,self.window)
         left_tabs_control.pack(expand=True, fill=BOTH)
 
         menu_widget = Menu(self.window)
