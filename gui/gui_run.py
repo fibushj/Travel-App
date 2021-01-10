@@ -1,4 +1,4 @@
-# TODO: show reviews in profile, del(/update) reviews in profile, statistics?,
+# TODO: "all" trip season+type, show reviews in profile, del(/update) reviews in profile, statistics?, handle err
 from ctypes import windll
 from tkinter import *
 
@@ -23,6 +23,7 @@ class MainGUI:
         self.reg_window = None
         self.login_window = None
         self.locations_view=None
+        self.db_manager=db_manager
 
         # Create right frame
         right_frame = Frame(self.window, bg=FRAME_BG, bd=10)
@@ -36,8 +37,8 @@ class MainGUI:
         left_tabs_control.pack(expand=True, fill=BOTH)
 
         menu_widget = Menu(self.window)
-        menu_widget.add_command(label="Profile", command=self.create_login_window if (
-            not db_manager.isUserLoggedIn()) else self.create_profile_window)
+
+        menu_widget.add_command(label="Profile", command=self.create_profile_window)
         menu_widget.add_command(label="Statistics", command=self.create_statistics_window)
         menu_widget.add_command(label="Quit", command=self.window.destroy)
 
@@ -53,19 +54,22 @@ class MainGUI:
         # destroy registration windows if exists
         if (self.reg_window):
             self.reg_window.destroy()
-        self.login_window = LoginWindow(self)
+        self.login_window = LoginWindow(self,self.db_manager)
 
     def create_reg_window(self):
         # destroy login windows if exists
         if (self.login_window):
             self.login_window.destroy()
-        self.reg_window = RegWindow(self)
+        self.reg_window = RegWindow(self,self.db_manager)
 
     def create_profile_window(self):
-        self.profile_window = ProfileWindow()
+        if not self.db_manager.isUserLoggedIn():
+            self.create_login_window()
+            return
+        self.profile_window = ProfileWindow(self.db_manager)
 
     def create_statistics_window(self):
         self.statistics_window = StatisticsWindow()
 
     def create_locations_view(self, containing_frame):
-        self.locations_view = LocationsView(containing_frame)
+        self.locations_view = LocationsView(containing_frame, self.db_manager)

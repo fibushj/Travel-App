@@ -177,13 +177,13 @@ class DataBaseManager:
 
 
     def searchLocations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size):
-        try:
-            result = self.database.find_locations(country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size)
-            self.last_location_data = [country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season]
-            self.last_locations_id = len(result)
-            return result, None
-        except Exception as err:
-                return None, generateErrorMessage(err.args[0])
+        # try:
+        result = self.database.find_locations(country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size)
+        self.last_location_data = [country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season]
+        self.last_locations_id = len(result)
+        return result, None
+        # except Exception as err:
+        #         return None, generateErrorMessage(err.args[0])
 
 
     def proceedLastSearchQuery(self, limit_size):

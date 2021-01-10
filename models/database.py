@@ -121,7 +121,7 @@ class Database:
                             FROM
                                 feature_code
                             WHERE
-                                name ='{fcode}'
+                                name ='{fcode}')
                         """
             else:
                 query += f"""AND feature_code IN (SELECT 

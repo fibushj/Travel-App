@@ -3,8 +3,9 @@ from tkinter import ttk
 from gui.location_window import LocationWindow
 
 class LocationsView(ttk.Treeview):
-    def __init__(self,containing_frame):
+    def __init__(self,containing_frame,db_manager):
         ttk.Treeview.__init__(self,containing_frame, selectmode='browse')
+        self.db_manager=db_manager
         self['show'] = 'headings'
         self["columns"] = ("1", "2", "3", "4", "5", "6", "7")
         self.column("#0", width=0, minwidth=0, stretch=YES)
@@ -36,4 +37,4 @@ class LocationsView(ttk.Treeview):
     def location_double_click(self, event):
         item = self.selection()[0]
         item_name = self.item(item)["values"][0]
-        LocationWindow(item, item_name)
+        LocationWindow(item, item_name,self.db_manager)

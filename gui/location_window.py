@@ -7,12 +7,12 @@ from gui.gui_utils import create_scrollable_frame, create_review_box
 from gui.pie_graph import PieGraph
 
 class LocationWindow(Toplevel):
-    def __init__(self,item,item_name):
+    def __init__(self,item,item_name,db_manager):
         Toplevel.__init__(self)
 
         self.title(item_name)
         self.geometry(str(int(WIDTH / 1.14)) + 'x' + str(int(HEIGHT / 1.08)))
-
+        self.db_manager=db_manager
         scrollable_frame = create_scrollable_frame(self)
         reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
@@ -23,7 +23,8 @@ class LocationWindow(Toplevel):
         text.insert("end", ' Write your review here...')
 
         trip_season_val = StringVar()
-        trip_season_dropmenu = ttk.OptionMenu(scrollable_frame, trip_season_val, "Trip season", "All", *consts.trip_season_options)
+        trip_season_options,err = self.db_manager.fetchTripSeasons()
+        trip_season_dropmenu = ttk.OptionMenu(scrollable_frame, trip_season_val, "Trip season", "All", *trip_season_options)
         trip_season_dropmenu.config(width=10)
         trip_season_dropmenu.pack(padx=3, expand=True)
 
@@ -50,13 +51,13 @@ class LocationWindow(Toplevel):
         #todo: query the amount of reviews on the current item for each trip type.
         trip_type_pie_label = Label(stats_frame, text="Trip Type Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
-        trip_type_labels = consts.trip_type_options
+        trip_type_options,err = self.db_manager.fetchTripTypes()
         trip_type_values = [30,50,28]
-        trip_type_pie = PieGraph(stats_frame,trip_type_labels,trip_type_values)
+        trip_type_pie = PieGraph(stats_frame,trip_type_options,trip_type_values)
 
         #todo: query the amount of reviews on the current item for each trip type.
         trip_season_pie_label = Label(stats_frame, text="Trip Season Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
-        trip_season_labels = consts.trip_season_options
+        trip_season_options,err = self.db_manager.fetchTripSeasons()
         trip_season_values = [30,50,28,70]
-        trip_type_pie = PieGraph(stats_frame,trip_season_labels,trip_season_values)
+        trip_type_pie = PieGraph(stats_frame,trip_season_options,trip_season_values)

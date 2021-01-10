@@ -4,7 +4,7 @@ from gui.consts import FRAME_BG, WIDTH, HEIGHT
 from gui.gui_utils import create_scrollable_frame, create_review_box
 
 class ProfileWindow(Toplevel):
-    def __init__(self):
+    def __init__(self,db_manager):
         Toplevel.__init__(self)
         self.title("My Profile")
         self.geometry(str(int(WIDTH / 1.75)) + 'x' + str(int(HEIGHT / 2)))
@@ -13,6 +13,7 @@ class ProfileWindow(Toplevel):
         reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
 
+        user_reviews,err=db_manager.getCurrentUserReviews(limit=50)
         # TODO JHONNY: query reviews for this user
         reviewer_name = 'Me'
         trip_season = 'Summer'

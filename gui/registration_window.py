@@ -5,16 +5,21 @@ from tkinter import ttk
 import tkcalendar
 
 class RegWindow(Toplevel):
-    def __init__(self,gui):
+    def __init__(self,gui,db_manager):
         Toplevel.__init__(self)
         self.title("Register")
-        self.geometry("220x400")
+        self.geometry("220x450")
         Label(self, text="Please enter registration details:").pack()
         Label(self, text="").pack()
         Label(self, text="Username").pack()
         username = StringVar()
         username_login_entry = Entry(self, textvariable=username)
         username_login_entry.pack()
+        Label(self, text="").pack()
+        Label(self, text="Email").pack()
+        email = StringVar()
+        email_login_entry = Entry(self, textvariable=email)
+        email_login_entry.pack()
         Label(self, text="").pack()
         Label(self, text="Password").pack()
         password = StringVar()
@@ -30,8 +35,8 @@ class RegWindow(Toplevel):
 
         Label(self, text="").pack()
 
-        validate_and_register = partial(self.validate_and_register, username.get, password.get,
-                                        birthday_picker.get_date)
+        validate_and_register = partial(self.validate_and_register, username.get, email.get, password.get,
+                                        birthday_picker.get_date,db_manager)
         Button(self, text="Register", width=10, height=1, command=validate_and_register).pack()
 
         reg_labelframe = ttk.Labelframe(self, text="OR")
@@ -40,9 +45,13 @@ class RegWindow(Toplevel):
 
 
     #TODO: implement!
-    def validate_and_register(self, get_username, get_password, get_birthday):
+    def validate_and_register(self, get_username, get_email, get_password,  get_birthday,db_manager):
         print("username entered :", get_username())
+        print("email entered :", get_email())
         print("password entered :", get_password())
         print("birthday entered :", get_birthday())
+
+        #TODO: popup if error
+        isSuc,err=db_manager.registerUser(get_username(),get_email(),get_password(),get_birthday())
 
         self.destroy()

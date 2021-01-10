@@ -3,15 +3,15 @@ from tkinter import *
 from tkinter import ttk
 
 class LoginWindow(Toplevel):
-    def __init__(self,gui):
+    def __init__(self,gui,db_manager):
         Toplevel.__init__(self)
         self.title("Login")
         self.geometry("220x325")
         Label(self, text="Please enter login details:").pack()
         Label(self, text="").pack()
-        Label(self, text="Username").pack()
-        username = StringVar()
-        username_login_entry = Entry(self, textvariable=username)
+        Label(self, text="Email").pack()
+        email = StringVar()
+        username_login_entry = Entry(self, textvariable=email)
         username_login_entry.pack()
         Label(self, text="").pack()
         Label(self, text="Password").pack()
@@ -19,7 +19,7 @@ class LoginWindow(Toplevel):
         password__login_entry = Entry(self, textvariable=password, show='*')
         password__login_entry.pack()
         Label(self, text="").pack()
-        validate_and_login = partial(self.validate_and_login, username.get, password.get)
+        validate_and_login = partial(self.validate_and_login, email.get, password.get,db_manager)
         Button(self, text="Log In", width=10, height=1, command=validate_and_login).pack()
 
         reg_labelframe = ttk.Labelframe(self, text="OR")
@@ -29,8 +29,10 @@ class LoginWindow(Toplevel):
 
 
     #TODO: implement!
-    def validate_and_login(self,get_username, get_password):
-        print("username entered :", get_username())
+    def validate_and_login(self, get_email, get_password, db_manager):
+        print("username entered :", get_email())
         print("password entered :", get_password())
+        #TODO: popup if error
+        isSuc,err=db_manager.logInUser(get_email(),get_password())
 
         self.destroy()

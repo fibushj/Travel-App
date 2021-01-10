@@ -25,8 +25,7 @@ class SearchTabsNotebook(ttk.Notebook):
         country_frame = Frame(f_search_tab, bg=FRAME_BG, bd=3)
         country_frame.pack(expand=True, fill=X)
         country_label = Label(country_frame, text="Country:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        #TODO: only fullname?
-        country_list_items = [x[1] for x in self.db_manager.fetchCountries()]
+        country_list_items,err = self.db_manager.fetchCountries()
         self.country_filter_list = self.create_filter_list(country_frame, country_list_items)
 
         self.create_buttom_part(f_search_tab)
@@ -36,8 +35,7 @@ class SearchTabsNotebook(ttk.Notebook):
         f_class_frame = Frame(containing_frame, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
         f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        #TODO: only fullname?
-        f_class_list_items = [x[1] for x in self.db_manager.fetchFeatureClasses()]
+        f_class_list_items,err = self.db_manager.fetchFeatureClasses()
         self.f_class_filter_list = self.create_filter_list(f_class_frame, f_class_list_items)
 
         f_code_frame = Frame(containing_frame, bg=FRAME_BG, bd=3)
@@ -59,7 +57,8 @@ class SearchTabsNotebook(ttk.Notebook):
 
         def show_result(event=None):
             item = filter_list.selection()
-            if item: filter_list.set_entry_text(item)
+            if item:
+                filter_list.set_entry_text(item)
 
         # Show the result of the calculation on Return or double-click
         # TODO: for feature codes only- fill list using query for all feature codes full name that match the selected feature class
@@ -73,8 +72,10 @@ class SearchTabsNotebook(ttk.Notebook):
         trip_frame.pack(expand=True, fill=X)
         self.trip_type_val = StringVar()
         self.trip_season_val = StringVar()
-        trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.trip_type_val, "Trip type", "All", *consts.trip_type_options, command=lambda selection: self.trip_type_val.set(selection))
-        trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.trip_season_val, "Trip season", "All", *consts.trip_season_options, command=lambda selection: self.trip_season_val.set(selection))
+        trip_type_options,err = self.db_manager.fetchTripTypes()
+        trip_season_options,err = self.db_manager.fetchTripSeasons()
+        trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.trip_type_val, "Trip type", "All", *trip_type_options, command=lambda selection: self.trip_type_val.set(selection))
+        trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.trip_season_val, "Trip season", "All", *trip_season_options, command=lambda selection: self.trip_season_val.set(selection))
         trip_type_dropmenu.config(width=10)
         trip_season_dropmenu.config(width=10)
         trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
@@ -84,11 +85,13 @@ class SearchTabsNotebook(ttk.Notebook):
     def f_search_and_update_locations(self):
         country_choice=self.country_filter_list.selection()
         f_class_choice=self.f_class_filter_list.selection()
-        f_code_choice=self.f_code_filter_list.selection()
+        # f_code_choice=self.f_code_filter_list.selection()
+        f_code_choice="populated place"
         trip_type_choice=self.trip_type_val.get()
         trip_season_choice=self.trip_season_val.get()
         # TODO: query to get results using all filters and insert to locations_view
-        # results=self.db_manager.fetchLocationsCountriesMode(country_choice,f_class_choice,f_code_choice,trip_type_choice,trip_season_choice)
+        results,err=self.db_manager.searchLocations(country_name=country_choice,fclass=f_class_choice,fcode=f_code_choice,trip_type=trip_type_choice,trip_season=trip_season_choice,radius=None,lat=None,lng=None,limit_size=50)
+
         self.locations_view.clear_table()
         # TODO: insert all results that match the user's input, in this format:
         self.locations_view.insert_row(("Pic de Font Blanca", "42.64991", "1.53335", "...", "...", "Europe/Andorra", "4.5"))
