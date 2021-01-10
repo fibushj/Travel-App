@@ -1,3 +1,21 @@
+UPDATE trip_type 
+SET 
+    name = CONCAT(UPPER(LEFT(name, 1)),
+            LOWER(SUBSTRING(name, 2, LENGTH(name))));
+
+UPDATE trip_season 
+SET 
+    name = CONCAT(UPPER(LEFT(name, 1)),
+            LOWER(SUBSTRING(name, 2, LENGTH(name))));
+
+ALTER TABLE location add column lat DECIMAL( 10, 8 ) NOT NULL;
+ALTER TABLE location add column lng DECIMAL( 11, 8 ) NOT NULL;
+update location set lat=ST_X(coordinates); -- invert in elad anton
+update location set lng=ST_Y(coordinates);
+ALTER TABLE location ADD INDEX(lat);
+ALTER TABLE location ADD INDEX(lng);
+-------------
+
 SET @R=100; 
 set @earth_radius=6378;
 set @lat = 31.4117;
@@ -14,8 +32,32 @@ SET @lng_max = @lng + @lng_delta;
 
 
 
-select (select name from trip_season tseason where id=trip_season) trip_season, count(*) num_reviews from review where place_id=8542111 group by trip_season;
-select (select name from trip_type ttype where id=trip_type) trip_type, count(*) num_reviews from review where place_id=8542111 group by trip_type;
+SELECT 
+    (SELECT 
+            name
+        FROM
+            trip_season tseason
+        WHERE
+            id = trip_season) trip_season,
+    COUNT(*) num_reviews
+FROM
+    review
+WHERE
+    place_id = 8542111
+GROUP BY trip_season;
+SELECT 
+    (SELECT 
+            name
+        FROM
+            trip_type ttype
+        WHERE
+            id = trip_type) trip_type,
+    COUNT(*) num_reviews
+FROM
+    review
+WHERE
+    place_id = 8542111
+GROUP BY trip_type;
 
 
 SELECT 
