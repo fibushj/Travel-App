@@ -285,11 +285,16 @@ class Database:
         else:
             command += f"user_id = {user_id} AND place_id = {location_id} LIMIT {limit}"
 
-        command_seasons = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
+        command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
                                 FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
-        command_types = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
-                                FROM ({command_seasons}) as l INNER JOIN trip_type as r ON l.trip_type = r.id"""
-        self.cursor.execute(command_types)
+        command = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
+                                FROM ({command}) as l INNER JOIN trip_type as r ON l.trip_type = r.id"""
+        if user_id == -1:
+            command = f""" SELECT r.full_name, FLOOR(YEAR(CURRENT_TIMESTAMP) - YEAR(r.date_of_birth)),
+                                    l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
+                                    FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
+
+        self.cursor.execute(command)
         return self.cursor.fetchall()
 
     # Those are functions needed for users handling
