@@ -203,3 +203,33 @@ class DataBaseManager:
         return result, None
         # except Exception as err:
         #         return False, generateErrorMessage(err.args[0])
+
+
+    def getGlobalStatistics(self):
+        try:
+            result = self.database.global_statistics()
+            return result, None
+        except Exception as err:
+            return False, generateErrorMessage(err.args[0])
+
+    def getHighestRatedLocations(self):
+        try:
+            result = self.database.highest_rated_locations()
+            return result, None
+        except Exception as err:
+            return False, generateErrorMessage(err.args[0])
+
+    def getLocationSeasonStatistics(self, location_id):
+        try:
+            result = self.database.trip_season_statistics_per_location(location_id)
+            return result, None
+        except Exception as err:
+            return False, generateErrorMessage(err.args[0])
+
+    def getLocationTripTypeStatistics(self, location_id):
+        try:
+            result = self.database.trip_type_statistics_per_location(location_id)
+            return result, None
+        except Exception as err:
+            return False, generateErrorMessage(err.args[0])
+
