@@ -215,7 +215,7 @@ class DataBaseManager:
         # try:
         result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
                         self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
-                        self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size)
+                        self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size, last_id=self.last_locations_id)
         if len(result) == 0:
             return [], None
         self.last_locations_id = result[len(result)-1][0]
