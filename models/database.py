@@ -34,9 +34,9 @@ class Database:
         query = ""
         args = []
         if country_name == "":
-            self.execute_single_query("SET @R= %s", radius)
-            self.execute_single_query("SET @lat = %s", lat)
-            self.execute_single_query("SET @lng = %s", lng)
+            self.execute_single_query("SET @R= %s", [radius])
+            self.execute_single_query("SET @lat = %s", [lat])
+            self.execute_single_query("SET @lng = %s", [lng])
             query += """ 
                 SET @earth_radius = 6378;
                 SET @km_per_lat_degree = @earth_radius * PI() / 180;
@@ -192,7 +192,7 @@ class Database:
                     ORDER BY average_rating DESC
                     LIMIT 20) temp ON l.id = temp.place_id;
             """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def global_statistics(self):
         query = """
@@ -214,7 +214,7 @@ class Database:
                 GROUP BY trip_type , trip_season
                 ORDER BY trip_season , trip_type;
                 """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def trip_season_statistics_per_location(self, location_id):
         query = f"""
@@ -232,7 +232,7 @@ class Database:
                     place_id = {location_id}
                 GROUP BY trip_season;
             """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def trip_type_statistics_per_location(self, location_id):
         query = f"""
@@ -250,7 +250,7 @@ class Database:
                     place_id = {location_id}
                 GROUP BY trip_type;
             """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def execute_single_query(self, query, args): 
         print(args) #TODO remove
