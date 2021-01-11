@@ -14,7 +14,11 @@ class DataBaseManager:
 
 
 
-    ### - FETCH OVERALL DATA FUNCTIONS
+    # Next six functions only call for relevant functions from model layer. Also it slightly 
+    # modifies returned data (deleting unrelevant parts of it), and catches exceptions, from
+    # witch it generated error messages, that (ideally - all of them) we will show to user.
+    # All functions in this object return two values - 1) value that user wants to receive;
+    # 2) string that contains some error message, that gui will show to user.
     def fetchCountries(self):
         try:
             countries = self.database.fetchCountries()
@@ -58,13 +62,15 @@ class DataBaseManager:
 
     def fetchLocationReviews(self, location_id, limit):
         try:
-            result = self.database.fetchReviews(location_id=location_id, limit=limit)
+            result = self.database.fetchLocationReviews(location_id, limit=limit)
             return result, None
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
 
-    ### - USER RELATED FUNCTIONS
+    # Current function firstly checks whether user is already inside of system. In this case, function returns
+    # negative result, with relevant error message.Then runs function of model layer, that checks whether exist
+    # user in system with entered credentials. In positive outcome, function returns - "true".
     def logInUser(self, email, password):
         try:
             if self.user_logged_in:
@@ -96,7 +102,8 @@ class DataBaseManager:
         else:
             return False
 
-
+    # First function checks whether in system already exists user with entered email. In such case function
+    # returns - "false". Otherwise we enter user data to system, and make log in of newly created user.
     def registerUser(self, full_name, email, password, birth_date):
         try:
             if self._validateUserEnryData(email):
@@ -112,17 +119,20 @@ class DataBaseManager:
     def isUserLoggedIn(self):
         return self.user_logged_in
     
-
+    # Current function returns all reviews that where written by user, firstly checking whether client
+    # made log in into system.
     def getCurrentUserReviews(self, limit):
         try:
             if self.user_logged_in:
-                result = self.database.fetchReviews(user_id=self.user_data[0], limit=limit)
+                result = self.database.fetchUserReviews(self.user_data[0], limit=limit)
                 return result, None
             else:
                 return None, "You had not logged in"
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
+    # Current function checks whether user made review on entered trip. This function is private and used
+    # in next function.
     def _isReviewBelongsToUser(self, place_id, trip_season):
         if self.isUserLoggedIn():
             if self.database.countSpecificUserReviews(self.user_data[0], place_id, trip_season) > 0:
@@ -132,7 +142,9 @@ class DataBaseManager:
         else:
             return False
     
-
+    # Current function takes data of review that user wants to delete. Firstly it checks whether user
+    # is logged in, and whether user have review that matches entered trip data. Then it runs function
+    # of model layer.
     def deleteCurrentUserReview(self, place_id, trip_season):
         try:
             if self.isUserLoggedIn() and self._isReviewBelongsToUser(place_id, trip_season):
@@ -145,7 +157,9 @@ class DataBaseManager:
         except Exception as err:
                 return False, generateErrorMessage(err.args[0])
     
-
+    # Current function takes all data, that concerns review that will be created. Firslty it checks whether
+    # user is logged in, and it checks that entered values are valid review values. Then, if data passes
+    # all checks, it runs relevant function from model layer.
     def addCurrentUserReview(self, place_id, rating, trip_type, trip_season, anon_rew, text_rew):
         try:
             if self.isUserLoggedIn() and (rating <= 10 and rating >= 1) and ((type(text_rew) == type('')) and (len(text_rew) < 300)):
@@ -176,6 +190,9 @@ class DataBaseManager:
     #             return False, generateErrorMessage(err.args[0])
 
 
+
+    # Basically, this function wraps function from model layer, that performs locations search operation. Also it meant to 
+    # save data of last made search attributes, and id of last received location data. It made for pagination functionality.
     def searchLocations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size):
         # try:
         result = self.database.find_locations(country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size)
@@ -189,6 +206,8 @@ class DataBaseManager:
         #         return None, generateErrorMessage(err.args[0])
 
 
+    # Current function is similar to preceding one, with only one change - it takes search query data not from gui layer,
+    # but from internal list, that conatins search attributes data from last performed search.
     def proceedLastSearchQuery(self, limit_size):
         if self.last_locations_query_data == None:
             return None, "You haven't yet searched nothing"
@@ -196,7 +215,7 @@ class DataBaseManager:
         # try:
         result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
                         self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
-                        self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size)
+                        self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size, last_id=self.last_locations_id)
         if len(result) == 0:
             return [], None
         self.last_locations_id = result[len(result)-1][0]

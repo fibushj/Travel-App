@@ -34,10 +34,13 @@ class Database:
         query = ""
         args = []
         if country_name == "":
-            self.execute_single_query("SET @R= %s", [radius])
-            self.execute_single_query("SET @lat = %s", [lat])
-            self.execute_single_query("SET @lng = %s", [lng])
-            query += """ 
+            self.execute_single_query(
+                "SET @R= %s;", args=[radius], is_expecting_result=False)
+            self.execute_single_query(
+                "SET @lat = %s;", args=[lat], is_expecting_result=False)
+            self.execute_single_query(
+                "SET @lng = %s;", args=[lng], is_expecting_result=False)
+            self.execute_multiple_queries(""" 
                 SET @earth_radius = 6378;
                 SET @km_per_lat_degree = @earth_radius * PI() / 180;
                 SET @lat_delta = @R /@km_per_lat_degree;
@@ -46,7 +49,7 @@ class Database:
                 SET @lat_max = @lat + @lat_delta;
                 SET @lng_min = @lng - @lng_delta;
                 SET @lng_max = @lng + @lng_delta;
-                """
+                """)
         review_ignored_values = ["", "All", "Trip type", "Trip season"]
         review_conditions = ""
         review_args = []
@@ -61,7 +64,7 @@ class Database:
                     """
             review_args.extend([trip_type])
         query += f"""
-                SELECT
+                SELECT DISTINCT
                     l.id,
                     l.name,
                     lat latitude,
@@ -252,22 +255,24 @@ class Database:
             """
         return self.execute_single_query(query)
 
-    def execute_single_query(self, query, args=[]): 
+    def execute_single_query(self, query, args=[], is_expecting_result=True):
         if args:
             self.cursor.execute(query, tuple(args))
         else:
             self.cursor.execute(query)
-        res = self.cursor.fetchall()
-        return res
+        print(self.cursor.statement)
+        if is_expecting_result:
+            return self.cursor.fetchall()
+        return []
 
     def execute_multiple_queries(self, query):
         print(query)  # TODO remove
         for stmt in query.split(';'):
             if stmt.strip():
                 self.cursor.execute(stmt)
-    # Function added by Anton
-    # Those are simple functions that fetch necessary data for gui
 
+
+    # Next five functions just fetch all data from number of small tables
     def fetchCountries(self):
         self.cursor.execute("SELECT * FROM country;")
         return self.cursor.fetchall()
@@ -276,12 +281,15 @@ class Database:
         self.cursor.execute("SELECT * FROM feature_class;")
         return self.cursor.fetchall()
 
+    # Function get's name of feature class, and uses it to fetch relevant feature codes from
+    # table "feature_code". First we run query to get id of entered feature class name, and then
+    # run query to get relevant data from "feature_code" table.
     def fetchFeatureCodes(self, feature_class_name):
         self.cursor.execute(
-            f"SELECT id FROM feature_class WHERE name = '{feature_class_name}';")
+            "SELECT id FROM feature_class WHERE name = %s;", tuple([feature_class_name]))
         feature_class_id = self.cursor.fetchall()[0][0]
         self.cursor.execute(
-            f"SELECT * FROM feature_code WHERE feature_class = '{feature_class_id}';")
+            "SELECT * FROM feature_code WHERE feature_class = %s;", tuple([feature_class_id]))
         return self.cursor.fetchall()
 
     def fetchTripSeasons(self):
@@ -292,72 +300,134 @@ class Database:
         self.cursor.execute("SELECT * FROM trip_type;")
         return self.cursor.fetchall()
 
-    def fetchReviews(self, limit=50, location_id=-1, user_id=-1):
-        command = "SELECT * FROM review WHERE "
+    # Next function takes location_id and user_id as arguments, which are set to "-1" by default.
+    # In general current function builds SQL query depending on which of these two arguments where
+    # entered by caller.
+    # def fetchReviews(self, limit=50, location_id=-1, user_id=-1):
+    #     command = "SELECT * FROM review WHERE "
 
-        if (location_id == -1 and user_id == -1):
-            raise Exception("Have to provide user id or location id")
-        elif (location_id != -1 and user_id == -1):
-            command += f"place_id = {location_id} LIMIT {limit}"
-        elif (location_id == -1 and user_id != -1):
-            command += f"user_id = {user_id} LIMIT {limit}"
-        else:
-            raise Exception(
-                "Cannot provide specific user and specific location for the same time")
-            # command += f"user_id = {user_id} AND place_id = {location_id} LIMIT {limit}"
+    #     if (location_id == -1 and user_id == -1):
+    #         raise Exception("Have to provide user id or location id")
+    #     elif (location_id != -1 and user_id == -1):
+    #         command += f"place_id = {location_id} LIMIT {limit}"
+    #     elif (location_id == -1 and user_id != -1):
+    #         command += f"user_id = {user_id} LIMIT {limit}"
+    #     else:
+    #         raise Exception("Cannot provide specific user and specific location for the same time")
+    #         # command += f"user_id = {user_id} AND place_id = {location_id} LIMIT {limit}"
 
+    #     command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
+    #                             FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
+    #     command = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
+    #                             FROM ({command}) as l INNER JOIN trip_type as r ON l.trip_type = r.id"""
+    #     if user_id == -1:
+    #         command = f""" SELECT r.full_name, FLOOR(YEAR(CURRENT_TIMESTAMP) - YEAR(r.date_of_birth)),
+    #                                 l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
+    #                                 FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
+    #     if location_id == -1:
+    #         command = f""" SELECT r.name as place_name, l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review
+    #                                 FROM ({command}) as l INNER JOIN location as r ON l.place_id = r.id"""
+
+    #     command = f"{command};"
+    #     self.cursor.execute(command)
+    #     return self.cursor.fetchall()
+
+    # Current function returns list of all reviews, that were made on provided location. Table "review" itself returns us
+    # id's of different data (like trip season, trip type, or user id). So we to make JOIN with relevant 3 tables, to fetch
+    # names of that data (trip type name, season, name of user and age of user).
+    def fetchLocationReviews(self, location_id, limit=-1):
+        args = [location_id]
+        command = "SELECT * FROM review WHERE place_id = %s "
+        if limit > 0:
+            args.append(limit)
+            command += "LIMIT %s "
         command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
                                 FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
         command = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
                                 FROM ({command}) as l INNER JOIN trip_type as r ON l.trip_type = r.id"""
-        if user_id == -1:
-            command = f""" SELECT r.full_name, FLOOR(YEAR(CURRENT_TIMESTAMP) - YEAR(r.date_of_birth)),
-                                    l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
-                                    FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
-        if location_id == -1:
-            command = f""" SELECT r.name as place_name, l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review
-                                    FROM ({command}) as l INNER JOIN location as r ON l.place_id = r.id"""
-
+        command = f""" SELECT r.full_name, FLOOR(YEAR(CURRENT_TIMESTAMP) - YEAR(r.date_of_birth)),
+                                l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
+                                FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
         command = f"{command};"
-        self.cursor.execute(command)
-        return self.cursor.fetchall()
+        return self.execute_single_query(command, args=args)
 
-    # Those are functions needed for users handling
+    # Current function returns list of all reviews that were made by logged in user. Likewise preceding function, here we have
+    # to swap between id's of different data, and actual textual names of that data. Also, unlike preceding function, we make
+    # JOIN with "location" table, to provide textual names of locations of reviews.
+    def fetchUserReviews(self, user_id, limit=-1):
+        args = [user_id]
+        command = "SELECT * FROM review WHERE user_id = %s "
+        if limit > 0:
+            args.append(limit)
+            command += "LIMIT %s "
+        command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
+                                FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
+        command = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
+                                FROM ({command}) as l INNER JOIN trip_type as r ON l.trip_type = r.id"""
+        command = f""" SELECT r.name as place_name, l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review
+                                FROM ({command}) as l INNER JOIN location as r ON l.place_id = r.id"""
+        command = f"{command};"
+        return self.execute_single_query(command, args=args)
+
+
+    # Next bunch of functions made to administrate all things related to authentication. 
+    # Current function takes user credentials as arguments, and makes SELECT query to check whether there
+    # exist user with those credentials
     def checkUserExistence(self, email, password):
-        self.cursor.execute(
-            f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
-        query_result = self.cursor.fetchall()
-        return query_result
+        args = [email, password]
+        command = "SELECT * FROM user WHERE email = %s AND password = %s;"
 
+        return self.execute_single_query(command, args=args)
+
+    # Current function takes email as argument, and makes SELECT query to check whether exist in system 
+    # user with this email. User mainly to check whether user can register into system with given email.
     def checkEmailExistence(self, email):
-        self.cursor.execute(
-            f"SELECT COUNT(*) FROM user WHERE email = '{email}';")
-        query_result = self.cursor.fetchall()[0][0]
-        return query_result
+        args = [email]
+        command = "SELECT COUNT(*) FROM user WHERE email = %s;"
 
+        return self.execute_single_query(command, args=args)[0][0]
+
+    # Current function enters new user to "user" table.
     def enterNewUser(self, full_name, email, password, birth_date):
-        self.cursor.execute(f"""INSERT INTO user(full_name, email, password, date_of_birth) 
-                        VALUES('{full_name}', '{email}', '{password}', '{birth_date}');""")
+        args = [full_name, email, password, birth_date]
+        command = "INSERT INTO user(full_name, email, password, date_of_birth) VALUES(%s, %s, %s, %s);"
 
+        self.cursor.execute(command, tuple(args))
+
+
+    # Current function counts number of reviews that were made by specific user, on specific
+    # location and season. Mainly used to check whether user can add new review on some location,
+    # and to forbid adding multiple reviews on one trip. Also in this (and next) functions, we take
+    # as argument names of possible search attributes (like trip season, or trip type). But to add
+    # new line to table we have to provide id of such things, so we make sub-commands, that we 
+    # eventually ember in main queries.
     def countSpecificUserReviews(self, user_id, place_id, trip_season):
-        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+        args = [user_id, place_id, trip_season]
+        trip_season_command = "SELECT id FROM trip_season WHERE name=%s"
+        command = "SELECT COUNT(*) FROM review WHERE user_id = %s AND place_id = %s AND"
+        command += f" trip_season = ({trip_season_command});"
 
-        self.cursor.execute(f"""SELECT COUNT(*) FROM review WHERE user_id = {user_id} 
-                                    AND place_id = {place_id} AND trip_season = ({trip_season_command});""")
-        return self.cursor.fetchall()[0][0]
+        return self.execute_single_query(command, args=args)[0][0]
 
     def deleteUserReview(self, user_id, place_id, trip_season):
-        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+        args = [user_id, place_id, trip_season]
+        trip_season_command = "SELECT id FROM trip_season WHERE name=%s"
+        command = "DELETE FROM review WHERE user_id = %s AND place_id = %s AND"
+        command += f" trip_season = ({trip_season_command});"
 
-        self.cursor.execute(f"""DELETE FROM review WHERE user_id = {user_id} 
-                                    AND place_id = {place_id} AND trip_season = ({trip_season_command});""")
+        self.cursor.execute(command, tuple(args))
 
     def addUserReview(self, user_id, place_id, rating, trip_type, trip_season, anon_rew, text_rew):
-        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
-        trip_type_command = f"SELECT id FROM trip_type WHERE name='{trip_type}'"
+        args = [user_id, place_id, rating, trip_type, trip_season, anon_rew, text_rew]
+        trip_season_command = "SELECT id FROM trip_season WHERE name=%s"
+        trip_type_command = "SELECT id FROM trip_type WHERE name=%s"
 
-        self.cursor.execute(f"""INSERT INTO review VALUES ({user_id},  {place_id}, {rating}, 
-                                ({trip_type_command}), ({trip_season_command}), {anon_rew}, '{text_rew}');""")
+        command = "INSERT INTO review VALUES (%s,  %s, %s,"
+        command += f" ({trip_type_command}), ({trip_season_command}),"
+        command += " %s, %s);"
+
+        self.cursor.execute(command, tuple(args))
+
 
     # Functions for initial data base initialization
     def populate_tables(self):
