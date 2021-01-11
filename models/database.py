@@ -285,7 +285,8 @@ class Database:
         elif (location_id == -1 and user_id != -1):
             command += f"user_id = {user_id} LIMIT {limit}"
         else:
-            command += f"user_id = {user_id} AND place_id = {location_id} LIMIT {limit}"
+            raise Exception("Cannot provide specific user and specific location for the same time")
+            # command += f"user_id = {user_id} AND place_id = {location_id} LIMIT {limit}"
 
         command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
                                 FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
@@ -295,6 +296,9 @@ class Database:
             command = f""" SELECT r.full_name, FLOOR(YEAR(CURRENT_TIMESTAMP) - YEAR(r.date_of_birth)),
                                     l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
                                     FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
+        if location_id == -1:
+            command = f""" SELECT r.name as place_name, l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review
+                                    FROM ({command}) as l INNER JOIN location as r ON l.place_id = r.id"""
 
         command = f"{command};"
         self.cursor.execute(command)
