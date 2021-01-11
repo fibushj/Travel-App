@@ -252,10 +252,11 @@ class Database:
             """
         return self.execute_single_query(query)
 
-    def execute_single_query(self, query, args): 
-        print(args) #TODO remove
-        print(query % tuple(args))
-        self.cursor.execute(query, tuple(args))
+    def execute_single_query(self, query, args=[]): 
+        if args:
+            self.cursor.execute(query, tuple(args))
+        else:
+            self.cursor.execute(query)
         res = self.cursor.fetchall()
         return res
 
