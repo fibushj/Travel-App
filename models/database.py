@@ -281,10 +281,10 @@ class Database:
     # run query to get relevant data from "feature_code" table.
     def fetchFeatureCodes(self, feature_class_name):
         self.cursor.execute(
-            f"SELECT id FROM feature_class WHERE name = '{feature_class_name}';")
+            "SELECT id FROM feature_class WHERE name = %s;", tuple([feature_class_name]))
         feature_class_id = self.cursor.fetchall()[0][0]
         self.cursor.execute(
-            f"SELECT * FROM feature_code WHERE feature_class = '{feature_class_id}';")
+            "SELECT * FROM feature_code WHERE feature_class = %s;", tuple([feature_class_id]))
         return self.cursor.fetchall()
 
     def fetchTripSeasons(self):
@@ -331,9 +331,11 @@ class Database:
     # id's of different data (like trip season, trip type, or user id). So we to make JOIN with relevant 3 tables, to fetch
     # names of that data (trip type name, season, name of user and age of user).
     def fetchLocationReviews(self, location_id, limit=-1):
-        command = f"SELECT * FROM review WHERE place_id = {location_id} "
+        args = [location_id]
+        command = "SELECT * FROM review WHERE place_id = %s "
         if limit > 0:
-            command += f"LIMIT {limit} "
+            args.append(limit)
+            command += "LIMIT %s "
         command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
                                 FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
         command = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
@@ -342,16 +344,17 @@ class Database:
                                 l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
                                 FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
         command = f"{command};"
-        self.cursor.execute(command)
-        return self.cursor.fetchall()
+        return self.execute_single_query(command, args=args)
 
     # Current function returns list of all reviews that were made by logged in user. Likewise preceding function, here we have
     # to swap between id's of different data, and actual textual names of that data. Also, unlike preceding function, we make
     # JOIN with "location" table, to provide textual names of locations of reviews.
     def fetchUserReviews(self, user_id, limit=-1):
-        command = f"SELECT * FROM review WHERE user_id = {user_id} "
+        args = [user_id]
+        command = "SELECT * FROM review WHERE user_id = %s "
         if limit > 0:
-            command += f"LIMIT {limit} "
+            args.append(limit)
+            command += "LIMIT %s "
         command = f"""SELECT l.user_id, l.place_id, l.rating, l.trip_type, r.name as trip_season, l.anonymous_review, l.review 
                                 FROM ({command}) as l INNER JOIN trip_season as r ON l.trip_season = r.id"""
         command = f"""SELECT l.user_id, l.place_id, l.rating, r.name as trip_type, l.trip_season, l.anonymous_review, l.review
@@ -359,31 +362,32 @@ class Database:
         command = f""" SELECT r.name as place_name, l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review
                                 FROM ({command}) as l INNER JOIN location as r ON l.place_id = r.id"""
         command = f"{command};"
-        self.cursor.execute(command)
-        return self.cursor.fetchall()
+        return self.execute_single_query(command, args=args)
 
 
     # Next bunch of functions made to administrate all things related to authentication. 
     # Current function takes user credentials as arguments, and makes SELECT query to check whether there
     # exist user with those credentials
     def checkUserExistence(self, email, password):
-        self.cursor.execute(
-            f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
-        query_result = self.cursor.fetchall()
-        return query_result
+        args = [email, password]
+        command = "SELECT * FROM user WHERE email = %s AND password = %s;"
+
+        return self.execute_single_query(command, args=args)
 
     # Current function takes email as argument, and makes SELECT query to check whether exist in system 
     # user with this email. User mainly to check whether user can register into system with given email.
     def checkEmailExistence(self, email):
-        self.cursor.execute(
-            f"SELECT COUNT(*) FROM user WHERE email = '{email}';")
-        query_result = self.cursor.fetchall()[0][0]
-        return query_result
+        args = [email]
+        command = "SELECT COUNT(*) FROM user WHERE email = %s;"
+
+        return self.execute_single_query(command, args=args)[0][0]
 
     # Current function enters new user to "user" table.
     def enterNewUser(self, full_name, email, password, birth_date):
-        self.cursor.execute(f"""INSERT INTO user(full_name, email, password, date_of_birth) 
-                        VALUES('{full_name}', '{email}', '{password}', '{birth_date}');""")
+        args = [full_name, email, password, birth_date]
+        command = "INSERT INTO user(full_name, email, password, date_of_birth) VALUES(%s, %s, %s, %s);"
+
+        self.cursor.execute(command, tuple(args))
 
 
     # Current function counts number of reviews that were made by specific user, on specific
@@ -393,24 +397,31 @@ class Database:
     # new line to table we have to provide id of such things, so we make sub-commands, that we 
     # eventually ember in main queries.
     def countSpecificUserReviews(self, user_id, place_id, trip_season):
-        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+        args = [user_id, place_id, trip_season]
+        trip_season_command = "SELECT id FROM trip_season WHERE name=%s"
+        command = "SELECT COUNT(*) FROM review WHERE user_id = %s AND place_id = %s AND"
+        command += f" trip_season = ({trip_season_command});"
 
-        self.cursor.execute(f"""SELECT COUNT(*) FROM review WHERE user_id = {user_id} 
-                                    AND place_id = {place_id} AND trip_season = ({trip_season_command});""")
-        return self.cursor.fetchall()[0][0]
+        return self.execute_single_query(command, args=args)[0][0]
 
     def deleteUserReview(self, user_id, place_id, trip_season):
-        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+        args = [user_id, place_id, trip_season]
+        trip_season_command = "SELECT id FROM trip_season WHERE name=%s"
+        command = "DELETE FROM review WHERE user_id = %s AND place_id = %s AND"
+        command += f" trip_season = ({trip_season_command});"
 
-        self.cursor.execute(f"""DELETE FROM review WHERE user_id = {user_id} 
-                                    AND place_id = {place_id} AND trip_season = ({trip_season_command});""")
+        self.cursor.execute(command, tuple(args))
 
     def addUserReview(self, user_id, place_id, rating, trip_type, trip_season, anon_rew, text_rew):
-        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
-        trip_type_command = f"SELECT id FROM trip_type WHERE name='{trip_type}'"
+        args = [user_id, place_id, rating, trip_type, trip_season, anon_rew, text_rew]
+        trip_season_command = "SELECT id FROM trip_season WHERE name=%s"
+        trip_type_command = "SELECT id FROM trip_type WHERE name=%s"
 
-        self.cursor.execute(f"""INSERT INTO review VALUES ({user_id},  {place_id}, {rating}, 
-                                ({trip_type_command}), ({trip_season_command}), {anon_rew}, '{text_rew}');""")
+        command = "INSERT INTO review VALUES (%s,  %s, %s,"
+        command += f" ({trip_type_command}), ({trip_season_command}),"
+        command += " %s, %s);"
+
+        self.cursor.execute(command, tuple(args))
 
 
     # Functions for initial data base initialization

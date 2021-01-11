@@ -11,5 +11,7 @@ def generateErrorMessage(error_number):
         return "Cannot conect with server"
     if error_number == 2008 or error_number == 1114:
         return "Server ran out of memory"
+    if error_number == 1292:
+        return "User entered invalid data"
     else:
         return f"Raised Mysql error:{error_number}" 
