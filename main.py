@@ -3,7 +3,6 @@ from models.database import Database
 from gui.gui_run import MainGUI
 from models.config import *
 
-
 db = Database()
 db.initialize()
 # fclass, fcode, trip_type, trip_season = "city, village", "populated place", "", ""

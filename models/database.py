@@ -1,3 +1,5 @@
+# TODO - handle all TODOs
+
 import mysql.connector
 import models.queries.locations_screen as locations_screen
 from models.utils import execute_sql_file
@@ -30,13 +32,13 @@ class Database:
 
     def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size, last_id=0):
         query = ""
-        args=[]
+        args = []
         if country_name == "":
+            self.execute_single_query("SET @R= %s", [radius])
+            self.execute_single_query("SET @lat = %s", [lat])
+            self.execute_single_query("SET @lng = %s", [lng])
             query += """ 
-                SET @R= %s;
                 SET @earth_radius = 6378;
-                SET @lat = %s;
-                SET @lng = %s;
                 SET @km_per_lat_degree = @earth_radius * PI() / 180;
                 SET @lat_delta = @R /@km_per_lat_degree;
                 SET @lng_delta = @lat_delta / COS(@lat * PI() / 180);
@@ -45,20 +47,19 @@ class Database:
                 SET @lng_min = @lng - @lng_delta;
                 SET @lng_max = @lng + @lng_delta;
                 """
-            args.append[radius, lat, lng]
         review_ignored_values = ["", "All", "Trip type", "Trip season"]
         review_conditions = ""
         review_args = []
         if trip_season not in review_ignored_values:
             review_conditions += """
-                    AND r.trip_season = (select id from trip_season where name = '%s')
+                    AND r.trip_season = (select id from trip_season where name = %s)
                     """
-            review_args.append[trip_season]
+            review_args.extend([trip_season])
         if trip_type not in review_ignored_values:
             review_conditions += """
-                    AND r.trip_type = (select id from trip_type where name = '%s')
+                    AND r.trip_type = (select id from trip_type where name = %s)
                     """
-            review_args.append[trip_type]
+            review_args.extend([trip_type])
         query += f"""
                 SELECT
                     l.id,
@@ -94,7 +95,7 @@ class Database:
                             {review_conditions}
                             ) average_rating
                 """
-        args.append(review_args)
+        args.extend(review_args)
         if country_name != "":
             query += """
                     FROM
@@ -106,15 +107,15 @@ class Database:
             query += """
             FROM location l
             """
-        if review_conditions!="":
+        if review_conditions != "":
             query += """
                         JOIN
                     review r ON l.id = r.place_id
                     """
         if country_name != "":
-            query += """WHERE c.id = (select id from country where name = '%s') 
+            query += """WHERE c.id = (select id from country where name = %s) 
             """
-            args.append(country_name)
+            args.extend([country_name])
         else:
             query += """
                     WHERE
@@ -128,9 +129,9 @@ class Database:
                             FROM
                                 feature_code
                             WHERE
-                                name ='%s')
+                                name =%s)
                         """
-                args.append(fcode)
+                args.extend([fcode])
             else:
                 query += """AND feature_code IN (SELECT 
                                 fcode.id
@@ -139,19 +140,19 @@ class Database:
                                     JOIN
                                 feature_class fclass ON fcode.feature_class = fclass.id
                             WHERE
-                                fclass.name = '%s')
+                                fclass.name = %s)
                 """
-                args.append(fclass)
+                args.extend([fclass])
 
         query += review_conditions
-        args.append(review_args)
+        args.extend(review_args)
         query += """
                 AND l.id > %s
                 ORDER BY l.id limit %s
                 ;
                 """
-        args.append(last_id,limit_size)
-        return self.execute_query(query, args)
+        args.extend([last_id, limit_size])
+        return self.execute_single_query(query, args)
 
     def highest_rated_locations(self):
         query = """
@@ -191,7 +192,7 @@ class Database:
                     ORDER BY average_rating DESC
                     LIMIT 20) temp ON l.id = temp.place_id;
             """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def global_statistics(self):
         query = """
@@ -213,10 +214,10 @@ class Database:
                 GROUP BY trip_type , trip_season
                 ORDER BY trip_season , trip_type;
                 """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def trip_season_statistics_per_location(self, location_id):
-        query=f"""
+        query = f"""
                 SELECT 
                     (SELECT 
                             name
@@ -231,10 +232,10 @@ class Database:
                     place_id = {location_id}
                 GROUP BY trip_season;
             """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
     def trip_type_statistics_per_location(self, location_id):
-        query=f"""
+        query = f"""
                 SELECT 
                     (SELECT 
                             name
@@ -249,15 +250,21 @@ class Database:
                     place_id = {location_id}
                 GROUP BY trip_type;
             """
-        return self.execute_query(query)
+        return self.execute_single_query(query)
 
-    def execute_query(self, query):
-        print(query)
+    def execute_single_query(self, query, args=[]): 
+        if args:
+            self.cursor.execute(query, tuple(args))
+        else:
+            self.cursor.execute(query)
+        res = self.cursor.fetchall()
+        return res
+
+    def execute_multiple_queries(self, query):
+        print(query)  # TODO remove
         for stmt in query.split(';'):
             if stmt.strip():
                 self.cursor.execute(stmt)
-        res = self.cursor.fetchall()
-        return  res
 
 
     # Next five functions just fetch all data from number of small tables
@@ -273,9 +280,11 @@ class Database:
     # table "feature_code". First we run query to get id of entered feature class name, and then
     # run query to get relevant data from "feature_code" table.
     def fetchFeatureCodes(self, feature_class_name):
-        self.cursor.execute(f"SELECT id FROM feature_class WHERE name = '{feature_class_name}';")
+        self.cursor.execute(
+            f"SELECT id FROM feature_class WHERE name = '{feature_class_name}';")
         feature_class_id = self.cursor.fetchall()[0][0]
-        self.cursor.execute(f"SELECT * FROM feature_code WHERE feature_class = '{feature_class_id}';")
+        self.cursor.execute(
+            f"SELECT * FROM feature_code WHERE feature_class = '{feature_class_id}';")
         return self.cursor.fetchall()
 
     def fetchTripSeasons(self):
@@ -358,14 +367,16 @@ class Database:
     # Current function takes user credentials as arguments, and makes SELECT query to check whether there
     # exist user with those credentials
     def checkUserExistence(self, email, password):
-        self.cursor.execute(f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
+        self.cursor.execute(
+            f"SELECT * FROM user WHERE email = '{email}' AND password = '{password}';")
         query_result = self.cursor.fetchall()
         return query_result
 
     # Current function takes email as argument, and makes SELECT query to check whether exist in system 
     # user with this email. User mainly to check whether user can register into system with given email.
     def checkEmailExistence(self, email):
-        self.cursor.execute(f"SELECT COUNT(*) FROM user WHERE email = '{email}';")
+        self.cursor.execute(
+            f"SELECT COUNT(*) FROM user WHERE email = '{email}';")
         query_result = self.cursor.fetchall()[0][0]
         return query_result
 
