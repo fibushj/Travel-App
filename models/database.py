@@ -244,9 +244,11 @@ class Database:
 
     def execute_query(self, query):
         print(query)
-        self.cursor.execute(query, multi=True)
+        for stmt in query.split(';'):
+            if stmt.strip():
+                self.cursor.execute(stmt)
         res = self.cursor.fetchall()
-        return res
+        return  res
 
 
     # Function added by Anton
