@@ -97,8 +97,6 @@ class MyFilterList(Frame):
         self._text_entry.delete(0, END)
         self._text_entry.insert(0, text)
 
-
-
     def bind(self, sequence=None, func=None, add=None):
         """Bind to this widget at event SEQUENCE a call to function FUNC."""
 
@@ -284,7 +282,7 @@ class MyFilterList(Frame):
         """Return the widget to bind to the specified sequence."""
 
         if ("Button" in sequence
-            or "MouseWheel" in sequence):
+                or "MouseWheel" in sequence):
             # Bind mouse button events to the Listbox widget
             return self._listbox
 

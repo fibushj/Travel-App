@@ -1,8 +1,6 @@
 from functools import partial
 from tkinter import *
 from tkinter import ttk, messagebox
-
-from gui import consts
 from gui.consts import WIDTH, HEIGHT, FRAME_BG
 from gui.gui_utils import create_scrollable_frame, create_review_box
 from gui.pie_graph import PieGraph
@@ -33,44 +31,45 @@ class LocationWindow(Toplevel):
         trip_type_val = StringVar()
         trip_type_options, err = self.db_manager.fetchTripTypes()
         trip_type_dropmenu = ttk.OptionMenu(parameters_frame, trip_type_val, "Trip type", *trip_type_options)
-        trip_type_dropmenu.config(width=10,style='TMenubutton')
-        trip_type_dropmenu.pack(side="left",expand=True)
+        trip_type_dropmenu.config(width=10, style='TMenubutton')
+        trip_type_dropmenu.pack(side="left", expand=True)
 
         trip_season_val = StringVar()
         trip_season_options, err = self.db_manager.fetchTripSeasons()
         trip_season_dropmenu = ttk.OptionMenu(parameters_frame, trip_season_val, "Trip season", *trip_season_options)
         trip_season_dropmenu.config(width=10)
-        trip_season_dropmenu.pack(side="left",expand=True)
+        trip_season_dropmenu.pack(side="left", expand=True)
 
         is_anon_val = StringVar()
         ttk.Style().configure('TCheckbutton', background='white')  # define a style object for the scale widget
-        is_anon_checkbox=ttk.Checkbutton(parameters_frame, text='Anonymous', variable = is_anon_val, style='TCheckbutton')
-        is_anon_checkbox.pack(side="left",expand=True)
+        is_anon_checkbox = ttk.Checkbutton(parameters_frame, text='Anonymous', variable=is_anon_val, style='TCheckbutton')
+        is_anon_checkbox.pack(side="left", expand=True)
 
         rating_frame = Frame(parameters_frame, bg='white', bd=3)
-        rating_frame.pack(side="left",expand=True)
+        rating_frame.pack(side="left", expand=True)
         rating_label = Label(rating_frame, text="Rating:", width=7, bg='white').pack(side="left")
-        rating_entry = Entry(rating_frame,width=10)
+        rating_entry = Entry(rating_frame, width=10)
         rating_entry.pack(side="left")
 
-        sep=ttk.Separator(add_review_frame,orient = HORIZONTAL)
+        sep = ttk.Separator(add_review_frame, orient=HORIZONTAL)
         sep.pack(expand=True, fill=BOTH, padx=20, pady=(5, 20), side="bottom")
 
         location_id = location[0]
-        def add_review(location_id, rating_entry, trip_type_val, trip_season_val, is_anon_val , review_text):
-            isSuc,err=db_manager.addCurrentUserReview(place_id=location_id, rating=float(rating_entry.get()), trip_type=trip_type_val.get(), trip_season=trip_season_val.get(), anon_rew=is_anon_val.get(), text_rew=review_text.get("1.0",END))
-            if(isSuc):
+
+        def add_review(location_id, rating_entry, trip_type_val, trip_season_val, is_anon_val, review_text):
+            isSuc, err = db_manager.addCurrentUserReview(place_id=location_id, rating=float(rating_entry.get()), trip_type=trip_type_val.get(),
+                                                         trip_season=trip_season_val.get(), anon_rew=is_anon_val.get(),
+                                                         text_rew=review_text.get("1.0", END))
+            if (isSuc):
                 messagebox.showinfo("Success", "Review added!")
                 self.destroy()
             else:
                 messagebox.showinfo("Error", err)
                 self.lift()
-        add_review_handler = partial(add_review, location_id, rating_entry, trip_type_val, trip_season_val, is_anon_val , review_text)
+
+        add_review_handler = partial(add_review, location_id, rating_entry, trip_type_val, trip_season_val, is_anon_val, review_text)
         add_review_button = Button(add_review_frame, text="Add review", width=15, bg=FRAME_BG, command=add_review_handler)
-        add_review_button.pack(expand=True, side="bottom" ,pady=10)
-
-
-
+        add_review_button.pack(expand=True, side="bottom", pady=10)
 
         location_reviews, err = db_manager.fetchLocationReviews(location_id, limit=50)
         for review in location_reviews:

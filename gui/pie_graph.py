@@ -2,8 +2,9 @@ import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
+
 class PieGraph:
-    def __init__(self,parent_frame,_labels,_pieSizes):
+    def __init__(self, parent_frame, _labels, _pieSizes):
         _figure = Figure(figsize=(4.5, 4), dpi=100)
         _subplot = _figure.add_subplot(111)
         _explode = tuple(0.04 for _ in range(len(_labels)))

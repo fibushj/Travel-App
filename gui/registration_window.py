@@ -3,8 +3,9 @@ from tkinter import *
 from tkinter import ttk, messagebox
 import tkcalendar
 
+
 class RegWindow(Toplevel):
-    def __init__(self,gui,db_manager):
+    def __init__(self, gui, db_manager):
         Toplevel.__init__(self)
         self.title("Register")
         self.geometry("270x480")
@@ -35,18 +36,16 @@ class RegWindow(Toplevel):
         Label(self, text="").pack()
 
         validate_and_register = partial(self.validate_and_register, username.get, email.get, password.get,
-                                        birthday_picker.get_date,db_manager)
+                                        birthday_picker.get_date, db_manager)
         Button(self, text="Register", width=10, height=1, command=validate_and_register).pack()
 
         reg_labelframe = ttk.Labelframe(self, text="OR")
         reg_labelframe.pack(ipadx=20, ipady=5)
         Button(reg_labelframe, text="Log In", width=10, height=1, command=gui.create_login_window).pack()
 
-
-    #TODO: implement!
-    def validate_and_register(self, get_username, get_email, get_password,  get_birthday,db_manager):
-        isSuc,err=db_manager.registerUser(get_username(),get_email(),get_password(),get_birthday())
-        if(isSuc):
+    def validate_and_register(self, get_username, get_email, get_password, get_birthday, db_manager):
+        isSuc, err = db_manager.registerUser(get_username(), get_email(), get_password(), get_birthday())
+        if (isSuc):
             messagebox.showinfo("Success", "Registered and logged in successfully!")
             self.destroy()
         else:

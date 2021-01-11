@@ -2,21 +2,20 @@ from tkinter import *
 from tkinter import ttk
 from ttkwidgets import TickScale
 
-from gui import consts
 from gui.consts import FRAME_BG
 from gui.my_filter_list import MyFilterList
 
 
 class SearchTabsNotebook(ttk.Notebook):
-    def __init__(self,containing_frame, db_manager, locations_view,window):
-        self.db_manager=db_manager
-        self.locations_view=locations_view
-        self.window=window
-        ttk.Notebook.__init__(self,containing_frame)
+    def __init__(self, containing_frame, db_manager, locations_view, window):
+        self.db_manager = db_manager
+        self.locations_view = locations_view
+        self.window = window
+        ttk.Notebook.__init__(self, containing_frame)
         # Create first tab in left frame- search by feature tab
-        self.country_search_tab=self.create_country_search_tab(containing_frame)
+        self.country_search_tab = self.create_country_search_tab(containing_frame)
         # Create second tab in left frame- search by radius tab
-        self.radius_search_tab=self.create_radius_search_tab(containing_frame)
+        self.radius_search_tab = self.create_radius_search_tab(containing_frame)
 
     # Create first tab in left frame- search by country tab
     def create_country_search_tab(self, containing_frame):
@@ -26,17 +25,17 @@ class SearchTabsNotebook(ttk.Notebook):
         country_frame = Frame(class_search_tab, bg=FRAME_BG, bd=3)
         country_frame.pack(expand=True, fill=X)
         country_label = Label(country_frame, text="Country:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        country_list_items,err = self.db_manager.fetchCountries()
+        country_list_items, err = self.db_manager.fetchCountries()
         self.country_country_filter_list = self.create_filter_list(country_frame, country_list_items)
 
         f_class_frame = Frame(class_search_tab, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
         f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        f_class_list_items,err = self.db_manager.fetchFeatureClasses()
+        f_class_list_items, err = self.db_manager.fetchFeatureClasses()
         f_class_list_items.insert(0, "")
         self.country_f_class_filter_list = self.create_country_f_class_filter_list(f_class_frame, f_class_list_items)
 
-        self.country_f_code_frame = Frame(class_search_tab,name="country_f_code_frame", bg=FRAME_BG, bd=3)
+        self.country_f_code_frame = Frame(class_search_tab, name="country_f_code_frame", bg=FRAME_BG, bd=3)
         self.country_f_code_frame.pack(expand=True, fill=X)
         f_code_label = Label(self.country_f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_code_list_items = ["Please choose feature class first!"]
@@ -46,10 +45,12 @@ class SearchTabsNotebook(ttk.Notebook):
         trip_frame.pack(expand=True, fill=X)
         self.country_trip_type_val = StringVar()
         self.country_trip_season_val = StringVar()
-        trip_type_options,err = self.db_manager.fetchTripTypes()
-        trip_season_options,err = self.db_manager.fetchTripSeasons()
-        trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.country_trip_type_val, "Trip type", "All", *trip_type_options, command=lambda selection: self.country_trip_type_val.set(selection))
-        trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.country_trip_season_val, "Trip season", "All", *trip_season_options, command=lambda selection: self.country_trip_season_val.set(selection))
+        trip_type_options, err = self.db_manager.fetchTripTypes()
+        trip_season_options, err = self.db_manager.fetchTripSeasons()
+        trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.country_trip_type_val, "Trip type", "All", *trip_type_options,
+                                            command=lambda selection: self.country_trip_type_val.set(selection))
+        trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.country_trip_season_val, "Trip season", "All", *trip_season_options,
+                                              command=lambda selection: self.country_trip_season_val.set(selection))
         trip_type_dropmenu.config(width=10)
         trip_season_dropmenu.config(width=10)
         trip_type_dropmenu.pack(side="left", padx=3, expand=True, fill=X)
@@ -62,7 +63,7 @@ class SearchTabsNotebook(ttk.Notebook):
         return class_search_tab
 
     # Create second tab in left frame- search by radius tab
-    def create_radius_search_tab(self,containing_frame):
+    def create_radius_search_tab(self, containing_frame):
         radius_search_tab = Frame(containing_frame, bg=FRAME_BG, bd=3)
         self.add(radius_search_tab, text='Search By Radius')
 
@@ -81,8 +82,8 @@ class SearchTabsNotebook(ttk.Notebook):
         radius_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         radius_frame.pack(expand=True, fill=X)
         radius_label = Label(radius_frame, text="Radius:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        ttk.Style().configure('Horizontal.TScale', background=FRAME_BG) # define a style object for the scale widget
-        self.radius_radius_slider = TickScale(radius_frame, from_=0, to=100,style="Horizontal.TScale", orient=HORIZONTAL, digits=0)
+        ttk.Style().configure('Horizontal.TScale', background=FRAME_BG)  # define a style object for the scale widget
+        self.radius_radius_slider = TickScale(radius_frame, from_=0, to=100, style="Horizontal.TScale", orient=HORIZONTAL, digits=0)
         self.radius_radius_slider.pack(expand=True, fill=X)
 
         f_class_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
@@ -119,10 +120,7 @@ class SearchTabsNotebook(ttk.Notebook):
 
         return radius_search_tab
 
-
-
-
-    def create_filter_list(self,frame, source):
+    def create_filter_list(self, frame, source):
         filter_list = MyFilterList(frame, source=source, display_rule=lambda item: item,
                                    filter_rule=lambda item, text: text.lower() in item.lower())
         filter_list.pack(expand=True, fill=X)
@@ -137,7 +135,6 @@ class SearchTabsNotebook(ttk.Notebook):
         filter_list.bind("<Double-Button-1>", show_result)
         return filter_list
 
-
     def create_country_f_class_filter_list(self, frame, source):
         filter_list = MyFilterList(frame, source=source, display_rule=lambda item: item,
                                    filter_rule=lambda item, text: text.lower() in item.lower())
@@ -148,7 +145,7 @@ class SearchTabsNotebook(ttk.Notebook):
             if item:
                 filter_list.set_entry_text(item)
                 # fill list using query for all feature codes full name that match the selected feature class
-                matching_f_code_list_items,err = self.db_manager.fetchFeatureCodes(item)
+                matching_f_code_list_items, err = self.db_manager.fetchFeatureCodes(item)
                 matching_f_code_list_items.insert(0, "")
                 self.country_f_code_filter_list.destroy()
                 self.country_f_code_filter_list = self.create_filter_list(self.country_f_code_frame, matching_f_code_list_items)
@@ -169,9 +166,10 @@ class SearchTabsNotebook(ttk.Notebook):
                 filter_list.set_entry_text(item)
                 # fill list using query for all feature codes full name that match the selected feature class
                 matching_f_code_list_items, err = self.db_manager.fetchFeatureCodes(item)
+                matching_f_code_list_items.insert(0, "")
                 self.radius_f_code_filter_list.destroy()
                 self.radius_f_code_filter_list = self.create_filter_list(self.radius_f_code_frame,
-                                                                          matching_f_code_list_items)
+                                                                         matching_f_code_list_items)
 
         # Show the result of the calculation on Return or double-click
         filter_list.bind("<Return>", show_result)
@@ -181,7 +179,7 @@ class SearchTabsNotebook(ttk.Notebook):
     def search_by_radius_and_update_locations(self):
         lat_choice = self.radius_lat_entry.get()
         lon_choice = self.radius_lon_entry.get()
-        radius_choice= self.radius_radius_slider.get()
+        radius_choice = self.radius_radius_slider.get()
         f_class_choice = self.radius_f_class_filter_list.selection()
         f_code_choice = self.radius_f_code_filter_list.selection()
         trip_type_choice = self.radius_trip_type_val.get()
@@ -191,11 +189,6 @@ class SearchTabsNotebook(ttk.Notebook):
                                                        trip_season=trip_season_choice, radius=radius_choice, lat=lat_choice, lng=lon_choice,
                                                        limit_size=50)
 
-        # results, err = self.db_manager.searchLocations(country_name="", fclass="",
-        #                                                fcode="", trip_type="",
-        #                                                trip_season="", radius=100, lat=32.084, lng=34.768,
-        #                                                limit_size=50)
-
         self.locations_view.clear_table()
         # insert all results that match the user's input:
         for result in results:
@@ -203,14 +196,15 @@ class SearchTabsNotebook(ttk.Notebook):
 
     def search_by_country_and_update_locations(self):
 
-        country_choice=self.country_country_filter_list.selection()
-        f_class_choice=self.country_f_class_filter_list.selection()
-        f_code_choice=self.country_f_code_filter_list.selection()
-        trip_type_choice=self.country_trip_type_val.get()
-        trip_season_choice=self.country_trip_season_val.get()
-        results,err=self.db_manager.searchLocations(country_name=country_choice,fclass=f_class_choice,fcode=f_code_choice,trip_type=trip_type_choice,trip_season=trip_season_choice,radius=None,lat=None,lng=None,limit_size=50)
+        country_choice = self.country_country_filter_list.selection()
+        f_class_choice = self.country_f_class_filter_list.selection()
+        f_code_choice = self.country_f_code_filter_list.selection()
+        trip_type_choice = self.country_trip_type_val.get()
+        trip_season_choice = self.country_trip_season_val.get()
+        results, err = self.db_manager.searchLocations(country_name=country_choice, fclass=f_class_choice, fcode=f_code_choice,
+                                                       trip_type=trip_type_choice, trip_season=trip_season_choice, radius=None, lat=None, lng=None,
+                                                       limit_size=50)
         self.locations_view.clear_table()
         # insert all results that match the user's input:
         for result in results:
             self.locations_view.insert_row(result)
-

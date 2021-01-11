@@ -1,4 +1,3 @@
-# TODO: ("all" trip season+type,) show reviews in double click and add new, del(/update) reviews in profile, statistics?, handle err
 from ctypes import windll
 from tkinter import *
 
@@ -22,8 +21,8 @@ class MainGUI:
 
         self.reg_window = None
         self.login_window = None
-        self.locations_view=None
-        self.db_manager=db_manager
+        self.locations_view = None
+        self.db_manager = db_manager
 
         # Create right frame
         right_frame = Frame(self.window, bg=FRAME_BG, bd=10)
@@ -33,7 +32,7 @@ class MainGUI:
         left_frame = Frame(self.window, bg=FRAME_BG, bd=3)
         left_frame.place(relx=0, rely=0, relwidth=0.2, relheight=1)
         # Create Tab Control
-        left_tabs_control = SearchTabsNotebook(left_frame, db_manager, self.locations_view,self.window)
+        left_tabs_control = SearchTabsNotebook(left_frame, db_manager, self.locations_view, self.window)
         left_tabs_control.pack(expand=True, fill=BOTH)
 
         menu_widget = Menu(self.window)
@@ -54,13 +53,13 @@ class MainGUI:
         # destroy registration windows if exists
         if (self.reg_window):
             self.reg_window.destroy()
-        self.login_window = LoginWindow(self,self.db_manager)
+        self.login_window = LoginWindow(self, self.db_manager)
 
     def create_reg_window(self):
         # destroy login windows if exists
         if (self.login_window):
             self.login_window.destroy()
-        self.reg_window = RegWindow(self,self.db_manager)
+        self.reg_window = RegWindow(self, self.db_manager)
 
     def create_profile_window(self):
         if not self.db_manager.isUserLoggedIn():

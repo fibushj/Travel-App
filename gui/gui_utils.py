@@ -1,4 +1,3 @@
-from datetime import date
 from tkinter import *
 
 from gui.consts import FRAME_BG
