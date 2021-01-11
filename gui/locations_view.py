@@ -37,6 +37,6 @@ class LocationsView(ttk.Treeview):
         self.delete(*self.get_children())
 
     def location_double_click(self, event):
-        item = self.selection()[0]
-        item_name = self.item(item)["values"][0]
-        LocationWindow(item, item_name,self.db_manager)
+        selected = self.selection()[0]
+        location = self.item(selected)["values"]
+        LocationWindow(location,self.db_manager)

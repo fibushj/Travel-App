@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from gui import consts
 from gui.consts import WIDTH, HEIGHT, FRAME_BG
@@ -7,10 +7,10 @@ from gui.gui_utils import create_scrollable_frame, create_review_box
 from gui.pie_graph import PieGraph
 
 class LocationWindow(Toplevel):
-    def __init__(self,item,item_name,db_manager):
+    def __init__(self,location,db_manager):
         Toplevel.__init__(self)
 
-        self.title(item_name)
+        self.title(location[1])
         self.geometry(str(int(WIDTH / 1.14)) + 'x' + str(int(HEIGHT / 1.08)))
         self.db_manager=db_manager
         scrollable_frame = create_scrollable_frame(self)
@@ -32,32 +32,32 @@ class LocationWindow(Toplevel):
         add_review_button = Button(scrollable_frame, text="Add review", width=15, bg=FRAME_BG,
                                    command=lambda: None)
         add_review_button.pack(expand=True)
+        location_id=location[0]
+        location_reviews, err = db_manager.fetchLocationReviews(location_id,limit=50)
+        for review in location_reviews:
+            trip_season = review[5]
+            reviewer_name = "Anonymous" if review[6] else review[0]
+            review_frame = create_review_box(containing_frame=scrollable_frame, location_name="",
+                                             reviewer_name=reviewer_name, rating=review[3], trip_type=review[4],
+                                             trip_season=trip_season, reviewer_age=review[1], review_text=review[7])
 
-        # TODO JHONNY: query reviews for this item
-        reviewer_name = 'Tom'
-        trip_season = 'Summer'
-        reviewer_birthday = {"year": 1995, "month": 3, "day": 28}
-        review_text = 'The content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\n'
-        create_review_box(scrollable_frame, reviewer_name, reviewer_birthday, trip_season, review_text)
-
-        reviewer_name2 = 'Jhonny'
-        review_text2 = 'The content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\nThe content of the review...\n'
-        reviewer_birthday2 = {"year": 2000, "month": 12, "day": 8}
-        create_review_box(scrollable_frame, reviewer_name2, reviewer_birthday2, trip_season, review_text2)
 
         stats_frame = (ttk.Frame(self))
         stats_frame.pack(side="left", expand=False)
 
-        #todo: query the amount of reviews on the current item for each trip type.
-        trip_type_pie_label = Label(stats_frame, text="Trip Type Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
+        trip_type_pie_label = Label(stats_frame, text=" Trip Type Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
-        trip_type_options,err = self.db_manager.fetchTripTypes()
-        trip_type_values = [30,50,28]
-        trip_type_pie = PieGraph(stats_frame,trip_type_options,trip_type_values)
+        trip_type_stats,err=db_manager.getLocationTripTypeStatistics(location_id)
 
-        #todo: query the amount of reviews on the current item for each trip type.
-        trip_season_pie_label = Label(stats_frame, text="Trip Season Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
+        #split tuples list to labels and values
+        trip_type_labels=[x[0] for x in trip_type_stats]
+        trip_type_values =[x[1] for x in trip_type_stats]
+        trip_type_pie = PieGraph(stats_frame,trip_type_labels,trip_type_values)
+
+        trip_season_pie_label = Label(stats_frame, text=" Trip Season Statistics:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
-        trip_season_options,err = self.db_manager.fetchTripSeasons()
-        trip_season_values = [30,50,28,70]
-        trip_type_pie = PieGraph(stats_frame,trip_season_options,trip_season_values)
+        trip_season_stats,err=db_manager.getLocationSeasonStatistics(location_id)
+        #split tuples list to labels and values
+        trip_season_labels=[x[0] for x in trip_season_stats]
+        trip_season_values =[x[1] for x in trip_season_stats]
+        trip_season_pie = PieGraph(stats_frame,trip_season_labels,trip_season_values)
