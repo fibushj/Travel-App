@@ -1,14 +1,13 @@
 from functools import partial
 from tkinter import *
-from tkinter import ttk
-
+from tkinter import ttk, messagebox
 import tkcalendar
 
 class RegWindow(Toplevel):
     def __init__(self,gui,db_manager):
         Toplevel.__init__(self)
         self.title("Register")
-        self.geometry("220x450")
+        self.geometry("270x480")
         Label(self, text="Please enter registration details:").pack()
         Label(self, text="").pack()
         Label(self, text="Username").pack()
@@ -46,12 +45,10 @@ class RegWindow(Toplevel):
 
     #TODO: implement!
     def validate_and_register(self, get_username, get_email, get_password,  get_birthday,db_manager):
-        print("username entered :", get_username())
-        print("email entered :", get_email())
-        print("password entered :", get_password())
-        print("birthday entered :", get_birthday())
-
-        #TODO: popup if error
         isSuc,err=db_manager.registerUser(get_username(),get_email(),get_password(),get_birthday())
-
-        self.destroy()
+        if(isSuc):
+            messagebox.showinfo("Success", "Registered and logged in successfully!")
+            self.destroy()
+        else:
+            messagebox.showinfo("Error", err)
+            self.lift()

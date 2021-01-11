@@ -1,12 +1,13 @@
 from functools import partial
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
+
 
 class LoginWindow(Toplevel):
     def __init__(self,gui,db_manager):
         Toplevel.__init__(self)
         self.title("Login")
-        self.geometry("220x325")
+        self.geometry("270x325")
         Label(self, text="Please enter login details:").pack()
         Label(self, text="").pack()
         Label(self, text="Email").pack()
@@ -26,13 +27,12 @@ class LoginWindow(Toplevel):
         reg_labelframe.pack(ipadx=20, ipady=5)
         Button(reg_labelframe, text="Register", width=10, height=1, command=gui.create_reg_window).pack()
 
-
-
-    #TODO: implement!
     def validate_and_login(self, get_email, get_password, db_manager):
-        print("username entered :", get_email())
-        print("password entered :", get_password())
-        #TODO: popup if error
         isSuc,err=db_manager.logInUser(get_email(),get_password())
+        if(isSuc):
+            messagebox.showinfo("Success", "Logged in successfully")
+            self.destroy()
+        else:
+            messagebox.showinfo("Error", err)
+            self.lift()
 
-        self.destroy()

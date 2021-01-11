@@ -1,4 +1,4 @@
-# TODO: "all" trip season+type, show reviews in profile, del(/update) reviews in profile, statistics?, handle err
+# TODO: ("all" trip season+type,) show reviews in double click and add new, del(/update) reviews in profile, statistics?, handle err
 from ctypes import windll
 from tkinter import *
 

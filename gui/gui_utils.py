@@ -29,7 +29,7 @@ def create_scrollable_frame(containing_frame):
     return scrollable_frame
 
 
-def create_review_box(containing_frame, reviewer_name, reviewer_birthday, trip_season, review_text):
+def create_review_box(containing_frame, location_name, reviewer_name, rating, trip_type, trip_season, reviewer_age, review_text):
     frame = Frame(containing_frame, bg='white', bd=0, highlightthickness=0)
     frame.pack(expand=True, fill=BOTH)
 
@@ -41,14 +41,16 @@ def create_review_box(containing_frame, reviewer_name, reviewer_birthday, trip_s
 
     text.tag_configure("sender", font="Arial 15 bold")
     text.tag_configure("age", font="Arial 10")
+    text.tag_configure("trip_type", font="Arial 10")
     text.tag_configure("trip_season", font="Arial 8")
+    text.tag_configure("rating", font="Arial 8")
     text.tag_configure("message", font=("Helvetica", "13"), lmargin1=15, lmargin2=15)
 
     text.insert("end", reviewer_name.title() + ' ', "sender")
-    today = date.today()
-    reviewer_age = today.year - reviewer_birthday["year"] - (
-                (today.month, today.day) < (reviewer_birthday["month"], reviewer_birthday["day"]))
     text.insert("end", str(reviewer_age) + '\n', 'age')
+    text.insert("end", trip_type + '\n', 'trip_type')
     text.insert("end", trip_season + '\n', 'trip_season')
+    text.insert("end", str(rating) + '\n', 'rating')
     text.insert("end", '\n')
     text.insert("end", review_text + '\n\n', 'message')
+    return frame

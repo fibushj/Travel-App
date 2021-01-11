@@ -175,10 +175,6 @@ class SearchTabsNotebook(ttk.Notebook):
         filter_list.bind("<Double-Button-1>", show_result)
         return filter_list
 
-
-
-
-
     def search_by_radius_and_update_locations(self):
         lat_choice = self.radius_lat_entry.get()
         lon_choice = self.radius_lon_entry.get()
