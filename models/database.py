@@ -116,8 +116,8 @@ class Database:
                     lat between @lat_min and @lat_max and lng between @lng_min and @lng_max 
                     and (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
                     """
-        if fclass != "":
-            if fcode != "" and fcode !="Please choose feature class first!":
+        if fclass not in ["", "All"]:
+            if fcode not in ["", "Please choose feature class first!", "All"]:
                 query += f"""AND l.feature_code = (SELECT 
                                 id
                             FROM
