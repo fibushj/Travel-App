@@ -33,6 +33,7 @@ class SearchTabsNotebook(ttk.Notebook):
         f_class_frame.pack(expand=True, fill=X)
         f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_class_list_items,err = self.db_manager.fetchFeatureClasses()
+        f_class_list_items.insert(0, "")
         self.country_f_class_filter_list = self.create_country_f_class_filter_list(f_class_frame, f_class_list_items)
 
         self.country_f_code_frame = Frame(class_search_tab,name="country_f_code_frame", bg=FRAME_BG, bd=3)
@@ -88,6 +89,7 @@ class SearchTabsNotebook(ttk.Notebook):
         f_class_frame.pack(expand=True, fill=X)
         f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_class_list_items, err = self.db_manager.fetchFeatureClasses()
+        f_class_list_items.insert(0, "")
         self.radius_f_class_filter_list = self.create_radius_f_class_filter_list(f_class_frame, f_class_list_items)
 
         self.radius_f_code_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
@@ -147,6 +149,7 @@ class SearchTabsNotebook(ttk.Notebook):
                 filter_list.set_entry_text(item)
                 # fill list using query for all feature codes full name that match the selected feature class
                 matching_f_code_list_items,err = self.db_manager.fetchFeatureCodes(item)
+                matching_f_code_list_items.insert(0, "")
                 self.country_f_code_filter_list.destroy()
                 self.country_f_code_filter_list = self.create_filter_list(self.country_f_code_frame, matching_f_code_list_items)
 
