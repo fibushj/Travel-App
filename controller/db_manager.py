@@ -123,9 +123,9 @@ class DataBaseManager:
         except Exception as err:
                 return None, generateErrorMessage(err.args[0])
 
-    def _isReviewBelongsToUser(self, place_id, season_id):
+    def _isReviewBelongsToUser(self, place_id, trip_season):
         if self.isUserLoggedIn():
-            if self.database.countSpecificUserReviews(self.user_data[0], place_id, season_id) > 0:
+            if self.database.countSpecificUserReviews(self.user_data[0], place_id, trip_season) > 0:
                 return True
             else:
                 return False
@@ -133,10 +133,10 @@ class DataBaseManager:
             return False
     
 
-    def deleteCurrentUserReview(self, place_id, season_id):
+    def deleteCurrentUserReview(self, place_id, trip_season):
         try:
-            if self.isUserLoggedIn() and self._isReviewBelongsToUser(place_id, season_id):
-                self.database.deleteUserReview(self.user_data[0], place_id, season_id)
+            if self.isUserLoggedIn() and self._isReviewBelongsToUser(place_id, trip_season):
+                self.database.deleteUserReview(self.user_data[0], place_id, trip_season)
                 return True, None
             elif not self.isUserLoggedIn():
                 return False, "You had not logged in"
@@ -193,13 +193,13 @@ class DataBaseManager:
         if self.last_locations_query_data == None:
             return None, "You haven't yet searched nothing"
         
-        try:
-            result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
-                            self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
-                            self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size)
-            if len(result) == 0:
-                return [], None
-            self.last_locations_id = result[len(result)-1][0]
-            return result, None
-        except Exception as err:
-                return False, generateErrorMessage(err.args[0])
+        # try:
+        result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
+                        self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
+                        self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size)
+        if len(result) == 0:
+            return [], None
+        self.last_locations_id = result[len(result)-1][0]
+        return result, None
+        # except Exception as err:
+        #         return False, generateErrorMessage(err.args[0])

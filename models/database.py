@@ -293,6 +293,7 @@ class Database:
                                     l.place_id, l.rating, l.trip_type, l.trip_season, l.anonymous_review, l.review 
                                     FROM ({command}) as l INNER JOIN user as r ON l.user_id = r.id"""
 
+        command = f"{command};"
         self.cursor.execute(command)
         return self.cursor.fetchall()
 
@@ -312,18 +313,25 @@ class Database:
                         VALUES('{full_name}', '{email}', '{password}', '{birth_date}');""")
 
 
-    def countSpecificUserReviews(self, user_id, place_id, season_id):
+    def countSpecificUserReviews(self, user_id, place_id, trip_season):
+        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+
         self.cursor.execute(f"""SELECT COUNT(*) FROM review WHERE user_id = {user_id} 
-                                    AND place_id = {place_id} AND trip_season = {season_id};""")
+                                    AND place_id = {place_id} AND trip_season = ({trip_season_command});""")
         return self.cursor.fetchall()[0][0]
 
-    def deleteUserReview(self, user_id, place_id, season_id):
+    def deleteUserReview(self, user_id, place_id, trip_season):
+        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+
         self.cursor.execute(f"""DELETE FROM review WHERE user_id = {user_id} 
-                                    AND place_id = {place_id} AND trip_season = {season_id};""")
+                                    AND place_id = {place_id} AND trip_season = ({trip_season_command});""")
 
     def addUserReview(self, user_id, place_id, rating, trip_type, trip_season, anon_rew, text_rew):
-        self.cursor.execute(f"""INSERT INTO review VALUES ({user_id},  {place_id}, 
-                                    {rating}, {trip_type}, {trip_season}, {anon_rew}, '{text_rew}');""")
+        trip_season_command = f"SELECT id FROM trip_season WHERE name='{trip_season}'"
+        trip_type_command = f"SELECT id FROM trip_type WHERE name='{trip_type}'"
+
+        self.cursor.execute(f"""INSERT INTO review VALUES ({user_id},  {place_id}, {rating}, 
+                                ({trip_type_command}), ({trip_season_command}), {anon_rew}, '{text_rew}');""")
 
     # Functions for initial data base initialization
     def populate_tables(self):
