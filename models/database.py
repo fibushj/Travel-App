@@ -30,12 +30,13 @@ class Database:
 
     def find_locations(self, country_name, radius, lat, lng, fclass, fcode, trip_type, trip_season, limit_size, last_id=0):
         query = ""
+        args=[]
         if country_name == "":
-            query += f""" 
-                SET @R={radius};
+            query += """ 
+                SET @R= %s;
                 SET @earth_radius = 6378;
-                SET @lat = {lat};
-                SET @lng = {lng};
+                SET @lat = %s;
+                SET @lng = %s;
                 SET @km_per_lat_degree = @earth_radius * PI() / 180;
                 SET @lat_delta = @R /@km_per_lat_degree;
                 SET @lng_delta = @lat_delta / COS(@lat * PI() / 180);
@@ -44,18 +45,20 @@ class Database:
                 SET @lng_min = @lng - @lng_delta;
                 SET @lng_max = @lng + @lng_delta;
                 """
-
+            args.append[radius, lat, lng]
         review_ignored_values = ["", "All", "Trip type", "Trip season"]
         review_conditions = ""
+        review_args = []
         if trip_season not in review_ignored_values:
-            review_conditions += f"""
-                    AND r.trip_season = (select id from trip_season where name = '{trip_season}')
+            review_conditions += """
+                    AND r.trip_season = (select id from trip_season where name = '%s')
                     """
+            review_args.append[trip_season]
         if trip_type not in review_ignored_values:
-            review_conditions += f"""
-                    AND r.trip_type = (select id from trip_type where name = '{trip_type}')
+            review_conditions += """
+                    AND r.trip_type = (select id from trip_type where name = '%s')
                     """
-
+            review_args.append[trip_type]
         query += f"""
                 SELECT
                     l.id,
@@ -91,6 +94,7 @@ class Database:
                             {review_conditions}
                             ) average_rating
                 """
+        args.append(review_args)
         if country_name != "":
             query += """
                     FROM
@@ -108,8 +112,9 @@ class Database:
                     review r ON l.id = r.place_id
                     """
         if country_name != "":
-            query += f"""WHERE c.id = (select id from country where name = '{country_name}') 
+            query += """WHERE c.id = (select id from country where name = '%s') 
             """
+            args.append(country_name)
         else:
             query += """
                     WHERE
@@ -118,31 +123,35 @@ class Database:
                     """
         if fclass not in ["", "All"]:
             if fcode not in ["", "Please choose feature class first!", "All"]:
-                query += f"""AND l.feature_code = (SELECT 
+                query += """AND l.feature_code = (SELECT 
                                 id
                             FROM
                                 feature_code
                             WHERE
-                                name ='{fcode}')
+                                name ='%s')
                         """
+                args.append(fcode)
             else:
-                query += f"""AND feature_code IN (SELECT 
+                query += """AND feature_code IN (SELECT 
                                 fcode.id
                             FROM
                                 feature_code fcode
                                     JOIN
                                 feature_class fclass ON fcode.feature_class = fclass.id
                             WHERE
-                                fclass.name = '{fclass}')
+                                fclass.name = '%s')
                 """
+                args.append(fclass)
 
         query += review_conditions
-        query += f"""
-                AND l.id > {last_id}
-                ORDER BY l.id limit {limit_size}
+        args.append(review_args)
+        query += """
+                AND l.id > %s
+                ORDER BY l.id limit %s
                 ;
                 """
-        return self.execute_query(query)
+        args.append(last_id,limit_size)
+        return self.execute_query(query, args)
 
     def highest_rated_locations(self):
         query = """
