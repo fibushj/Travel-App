@@ -34,10 +34,13 @@ class Database:
         query = ""
         args = []
         if country_name == "":
-            self.execute_single_query("SET @R= %s", [radius])
-            self.execute_single_query("SET @lat = %s", [lat])
-            self.execute_single_query("SET @lng = %s", [lng])
-            query += """ 
+            self.execute_single_query(
+                "SET @R= %s;", args=[radius], is_expecting_result=False)
+            self.execute_single_query(
+                "SET @lat = %s;", args=[lat], is_expecting_result=False)
+            self.execute_single_query(
+                "SET @lng = %s;", args=[lng], is_expecting_result=False)
+            self.execute_multiple_queries(""" 
                 SET @earth_radius = 6378;
                 SET @km_per_lat_degree = @earth_radius * PI() / 180;
                 SET @lat_delta = @R /@km_per_lat_degree;
@@ -46,7 +49,7 @@ class Database:
                 SET @lat_max = @lat + @lat_delta;
                 SET @lng_min = @lng - @lng_delta;
                 SET @lng_max = @lng + @lng_delta;
-                """
+                """)
         review_ignored_values = ["", "All", "Trip type", "Trip season"]
         review_conditions = ""
         review_args = []
@@ -61,7 +64,7 @@ class Database:
                     """
             review_args.extend([trip_type])
         query += f"""
-                SELECT
+                SELECT DISTINCT
                     l.id,
                     l.name,
                     lat latitude,
@@ -252,13 +255,15 @@ class Database:
             """
         return self.execute_single_query(query)
 
-    def execute_single_query(self, query, args=[]): 
+    def execute_single_query(self, query, args=[], is_expecting_result=True):
         if args:
             self.cursor.execute(query, tuple(args))
         else:
             self.cursor.execute(query)
-        res = self.cursor.fetchall()
-        return res
+        print(self.cursor.statement)
+        if is_expecting_result:
+            return self.cursor.fetchall()
+        return []
 
     def execute_multiple_queries(self, query):
         print(query)  # TODO remove
