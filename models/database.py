@@ -243,7 +243,7 @@ class Database:
 
     def execute_query(self, query):
         print(query)
-        self.cursor.execute(query)
+        self.cursor.execute(query, multi=True)
         res = self.cursor.fetchall()
         return res
 
