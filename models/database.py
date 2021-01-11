@@ -57,7 +57,7 @@ class Database:
                     """
 
         query += f"""
-                SELECT DISTINCT
+                SELECT
                     l.id,
                     l.name,
                     lat latitude,
@@ -102,12 +102,13 @@ class Database:
             query += """
             FROM location l
             """
-        query += """
-                    JOIN
-                review r ON l.id = r.place_id
-                """
+        if review_conditions!="":
+            query += """
+                        JOIN
+                    review r ON l.id = r.place_id
+                    """
         if country_name != "":
-            query += f"""WHERE c.name = '{country_name}'
+            query += f"""WHERE c.id = (select id from country where name = '{country_name}') 
             """
         else:
             query += """
@@ -116,7 +117,7 @@ class Database:
                     and (((ACOS(SIN(@lat * PI() / 180) * SIN(lat * PI() / 180) + COS(@lat * PI() / 180) * COS(lat * PI() / 180) * COS((@lng - lng) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) * 1.609344) < @R
                     """
         if fclass != "":
-            if fcode != "":
+            if fcode != "" and fcode !="Please choose feature class first!":
                 query += f"""AND l.feature_code = (SELECT 
                                 id
                             FROM
