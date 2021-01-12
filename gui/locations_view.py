@@ -1,11 +1,12 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from gui.location_window import LocationWindow
 
 
 class LocationsView(ttk.Treeview):
     def __init__(self, containing_frame, db_manager):
         ttk.Treeview.__init__(self, containing_frame, selectmode='browse')
+        self.containing_frame = containing_frame
         self.db_manager = db_manager
         self['show'] = 'headings'
         self["columns"] = ("1", "2", "3", "4", "5", "6", "7", "8")
@@ -29,7 +30,24 @@ class LocationsView(ttk.Treeview):
         self.heading("8", text="Rating", anchor=W)
 
         self.bind("<Double-1>", self.location_double_click)
+
+        self.load_more_button = Button(self.containing_frame, text="Click here to load more", width=20, command=self.load_more)
+        self.load_more_button.pack(side="bottom", pady=(15, 5))
+
+        scrollbar = ttk.Scrollbar(self.containing_frame, orient="vertical", command=self.yview)
+        scrollbar.pack(side='right', fill='y')
+        self.configure(yscrollcommand=scrollbar.set)
+
         self.pack(expand=True, fill=BOTH)
+
+    def load_more(self):
+        results, err = self.db_manager.proceedLastSearchQuery(limit_size=50)
+        if (not results):
+            messagebox.showinfo("Error", err)
+            return
+
+        for result in results:
+            self.insert_row(result)
 
     def insert_row(self, row_values):
         self.insert(parent="", index="end", iid=None, values=row_values)
