@@ -8,6 +8,8 @@ from database.config import *
 
 
 class Database:
+    """A class for communication with db, execution of statements and queries
+    """
     def initialize(self):
         self.mydb = mysql.connector.connect(
             option_files='my.conf', #TODO
@@ -228,7 +230,7 @@ class Database:
         return self.execute_single_query(query)
 
     def trip_season_statistics_per_location(self, location_id):
-        query = f"""
+        query = """
                 SELECT 
                     (SELECT 
                             name
@@ -240,13 +242,13 @@ class Database:
                 FROM
                     review
                 WHERE
-                    place_id = {location_id}
+                    place_id = %s
                 GROUP BY trip_season;
             """
-        return self.execute_single_query(query)
+        return self.execute_single_query(query, [location_id])
 
     def trip_type_statistics_per_location(self, location_id):
-        query = f"""
+        query = """
                 SELECT 
                     (SELECT 
                             name
@@ -258,10 +260,10 @@ class Database:
                 FROM
                     review
                 WHERE
-                    place_id = {location_id}
+                    place_id = %s
                 GROUP BY trip_type;
             """
-        return self.execute_single_query(query)
+        return self.execute_single_query(query, [location_id])
 
     def execute_single_query(self, query, args=[], is_expecting_result=True):
         if args:

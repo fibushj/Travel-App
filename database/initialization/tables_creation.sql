@@ -28,7 +28,7 @@ CREATE TABLE user(
     id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL,
-    password VARCHAR(100) NOT NULL,
+    password VARCHAR(30) NOT NULL,
     date_of_birth DATE NOT NULL
 );
 
