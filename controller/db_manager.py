@@ -1,4 +1,4 @@
-from models.database import Database
+from database.database import Database
 from controller.utils import generateErrorMessage
 
 class DataBaseManager:
