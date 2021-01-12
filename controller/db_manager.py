@@ -60,7 +60,7 @@ class DataBaseManager:
                 return None, generateErrorMessage(err.args[0])
 
 
-    def fetchLocationReviews(self, location_id, limit):
+    def fetchLocationReviews(self, location_id, limit=-1):
         try:
             result = self.database.fetchLocationReviews(location_id, limit=limit)
             return result, None
@@ -121,7 +121,7 @@ class DataBaseManager:
     
     # Current function returns all reviews that where written by user, firstly checking whether client
     # made log in into system.
-    def getCurrentUserReviews(self, limit):
+    def getCurrentUserReviews(self, limit=-1):
         try:
             if self.user_logged_in:
                 result = self.database.fetchUserReviews(self.user_data[0], limit=limit)
