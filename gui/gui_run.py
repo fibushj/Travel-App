@@ -68,7 +68,7 @@ class MainGUI:
         self.profile_window = ProfileWindow(self.db_manager)
 
     def create_statistics_window(self):
-        self.statistics_window = StatisticsWindow()
+        self.statistics_window = StatisticsWindow(self.db_manager)
 
     def create_locations_view(self, containing_frame):
         self.locations_view = LocationsView(containing_frame, self.db_manager)

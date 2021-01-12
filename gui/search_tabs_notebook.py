@@ -30,15 +30,15 @@ class SearchTabsNotebook(ttk.Notebook):
 
         f_class_frame = Frame(class_search_tab, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
-        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_class_label = Label(f_class_frame, text="Category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_class_list_items, err = self.db_manager.fetchFeatureClasses()
         f_class_list_items.insert(0, "")
         self.country_f_class_filter_list = self.create_country_f_class_filter_list(f_class_frame, f_class_list_items)
 
         self.country_f_code_frame = Frame(class_search_tab, name="country_f_code_frame", bg=FRAME_BG, bd=3)
         self.country_f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(self.country_f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        f_code_list_items = ["Please choose feature class first!"]
+        f_code_label = Label(self.country_f_code_frame, text="Sub category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_code_list_items = ["Please choose category first!"]
         self.country_f_code_filter_list = self.create_filter_list(self.country_f_code_frame, f_code_list_items)
 
         trip_frame = Frame(class_search_tab, bg=FRAME_BG, bd=3)
@@ -88,15 +88,15 @@ class SearchTabsNotebook(ttk.Notebook):
 
         f_class_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
-        f_class_label = Label(f_class_frame, text="Feature Class:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_class_label = Label(f_class_frame, text="Category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_class_list_items, err = self.db_manager.fetchFeatureClasses()
         f_class_list_items.insert(0, "")
         self.radius_f_class_filter_list = self.create_radius_f_class_filter_list(f_class_frame, f_class_list_items)
 
         self.radius_f_code_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         self.radius_f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(self.radius_f_code_frame, text="Feature Code:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
-        f_code_list_items = ["Please choose feature class first!"]
+        f_code_label = Label(self.radius_f_code_frame, text="Sub category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_code_list_items = ["Please choose category first!"]
         self.radius_f_code_filter_list = self.create_filter_list(self.radius_f_code_frame, f_code_list_items)
 
         trip_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
