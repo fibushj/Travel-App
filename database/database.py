@@ -1,5 +1,3 @@
-# TODO - handle all TODOs
-
 import mysql.connector
 # from database.utils import execute_sql_file
 from database.config import *
@@ -12,7 +10,7 @@ class Database:
     """
     def initialize(self):
         self.mydb = mysql.connector.connect(
-            option_files='my.conf', #TODO
+            option_files='my.conf', 
             autocommit=True
         )
         self.cursor = self.mydb.cursor()
