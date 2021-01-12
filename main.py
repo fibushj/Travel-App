@@ -1,7 +1,7 @@
 from controller.db_manager import DataBaseManager
-from models.database import Database
+from database.database import Database
 from gui.gui_run import MainGUI
-from models.config import *
+from database.config import *
 
 db = Database()
 db.initialize()

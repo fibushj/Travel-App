@@ -1,4 +1,4 @@
-from models.database import Database
+from database.database import Database
 from controller.utils import generateErrorMessage
 
 class DataBaseManager:
@@ -210,14 +210,14 @@ class DataBaseManager:
     # but from internal list, that conatins search attributes data from last performed search.
     def proceedLastSearchQuery(self, limit_size):
         if self.last_locations_query_data == None:
-            return None, "You haven't yet searched nothing"
+            return None, "You haven't searched anything yet"
         
         # try:
         result = self.database.find_locations(self.last_locations_query_data[0], self.last_locations_query_data[1], self.last_locations_query_data[2], 
                         self.last_locations_query_data[3], self.last_locations_query_data[4], self.last_locations_query_data[5], 
                         self.last_locations_query_data[6], self.last_locations_query_data[7], limit_size, last_id=self.last_locations_id)
         if len(result) == 0:
-            return [], None
+            return [], "No more results"
         self.last_locations_id = result[len(result)-1][0]
         return result, None
         # except Exception as err:
