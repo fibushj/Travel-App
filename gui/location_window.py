@@ -71,11 +71,11 @@ class LocationWindow(Toplevel):
         add_review_button = Button(add_review_frame, text="Add review", width=15, bg=FRAME_BG, command=add_review_handler)
         add_review_button.pack(expand=True, side="bottom", pady=10)
 
-        location_reviews, err = db_manager.fetchLocationReviews(location_id, limit=50)
+        location_reviews, err = db_manager.fetchLocationReviews(location_id)
         for review in location_reviews:
             trip_season = review[5]
             reviewer_name = "Anonymous" if review[6] else review[0]
-            review_frame = create_review_box(containing_frame=scrollable_frame, location_name="",
+            review_frame = create_review_box(containing_frame=scrollable_frame, location_name=None,
                                              reviewer_name=reviewer_name, rating=review[3], trip_type=review[4],
                                              trip_season=trip_season, reviewer_age=review[1], review_text=review[7])
 
