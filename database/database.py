@@ -167,6 +167,7 @@ class Database:
     def highest_rated_locations(self):
         query = """
                 SELECT 
+                    l.id,
                     l.name,
                     lat latitude,
                     lng longitude,
