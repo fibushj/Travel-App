@@ -12,7 +12,7 @@ class StatisticsWindow(Toplevel):
 
         # Create top rated frame
         top_rated_frame = Frame(self, bg=FRAME_BG, bd=10)
-        top_rated_frame.pack(fill="both", expand=True, side="left")
+        top_rated_frame.place(relx=0, rely=0, relwidth=0.75, relheight=1)
         top_rated_view=TopRatedView(top_rated_frame)
         top_rated_results,err=db_manager.getHighestRatedLocations()
         for result in top_rated_results:
@@ -20,7 +20,8 @@ class StatisticsWindow(Toplevel):
 
         # Create age frame
         avg_age_frame = Frame(self, bg=FRAME_BG, bd=10)
-        avg_age_frame.pack(fill="both", expand=True, side="left")
+        # avg_age_frame.pack_propagate(0)
+        avg_age_frame.place(relx=0.75, rely=0, relwidth=0.25, relheight=1)
         avg_age_view=AvgAgeView(avg_age_frame)
         avg_age_results,err=db_manager.getGlobalStatistics()
         for result in avg_age_results:
@@ -33,16 +34,16 @@ class AvgAgeView(ttk.Treeview):
         self['show'] = 'headings'
         self["columns"] = ("1", "2", "3")
         self.column("#0", width=0, minwidth=0, stretch=YES)
-        self.column("1", width=40, minwidth=80, stretch=YES)
-        self.column("2", width=50, minwidth=80, stretch=YES)
-        self.column("3", width=60, minwidth=50, stretch=YES)
+        self.column("1", width=40, minwidth=40, stretch=YES)
+        self.column("2", width=40, minwidth=40, stretch=YES)
+        self.column("3", width=40, minwidth=40, stretch=YES)
         self.heading("1", text="Trip season", anchor=W)
         self.heading("2", text="Trip type", anchor=W)
         self.heading("3", text="Average age", anchor=W)
         self.pack(expand=True, fill=BOTH)
 
     def insert_row(self, row_values):
-        self.insert(parent="", index=1, iid=None, values=row_values)
+        self.insert(parent="", index="end", iid=None, values=row_values)
 
     def clear_table(self):
         self.delete(*self.get_children())
@@ -56,14 +57,14 @@ class TopRatedView(ttk.Treeview):
         self['show'] = 'headings'
         self["columns"] = ("1", "2", "3", "4", "5", "6", "7", "8")
         self.column("#0", width=0, minwidth=0, stretch=YES)
-        self.column("1", width=40, minwidth=80, stretch=YES)
-        self.column("2", width=160, minwidth=80, stretch=YES)
-        self.column("3", width=80, minwidth=50, stretch=YES)
-        self.column("4", width=80, minwidth=50, stretch=YES)
-        self.column("5", width=80, minwidth=50, stretch=YES)
-        self.column("6", width=80, minwidth=50, stretch=YES)
-        self.column("7", width=80, minwidth=50, stretch=YES)
-        self.column("8", width=80, minwidth=50, stretch=YES)
+        self.column("1", width=20, minwidth=20, stretch=YES)
+        self.column("2", width=100, minwidth=100, stretch=YES)
+        self.column("3", width=50, minwidth=50, stretch=YES)
+        self.column("4", width=50, minwidth=50, stretch=YES)
+        self.column("5", width=80, minwidth=80, stretch=YES)
+        self.column("6", width=80, minwidth=80, stretch=YES)
+        self.column("7", width=50, minwidth=50, stretch=YES)
+        self.column("8", width=20, minwidth=20, stretch=YES)
 
         self.heading("1", text="ID", anchor=W)
         self.heading("2", text="Name", anchor=W)
@@ -77,7 +78,7 @@ class TopRatedView(ttk.Treeview):
         self.pack(expand=True, fill=BOTH)
 
     def insert_row(self, row_values):
-        self.insert(parent="", index=1, iid=None, values=row_values)
+        self.insert(parent="", index="end", iid=None, values=row_values)
 
     def clear_table(self):
         self.delete(*self.get_children())

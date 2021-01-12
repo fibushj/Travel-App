@@ -32,7 +32,7 @@ class LocationsView(ttk.Treeview):
         self.pack(expand=True, fill=BOTH)
 
     def insert_row(self, row_values):
-        self.insert(parent="", index=1, iid=None, values=row_values)
+        self.insert(parent="", index="end", iid=None, values=row_values)
 
     def clear_table(self):
         self.delete(*self.get_children())
