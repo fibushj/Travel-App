@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 
 from gui.consts import FRAME_BG, WIDTH, HEIGHT
+from gui.location_window import LocationWindow
 
 
 class StatisticsWindow(Toplevel):
@@ -12,16 +13,17 @@ class StatisticsWindow(Toplevel):
 
         # Create top rated frame
         top_rated_frame = Frame(self, bg=FRAME_BG, bd=10)
-        top_rated_frame.place(relx=0, rely=0, relwidth=0.75, relheight=1)
-        top_rated_view=TopRatedView(top_rated_frame)
+        top_rated_frame.place(relx=0, rely=0, relwidth=0.7, relheight=1)
+        top_rated_label = Label(top_rated_frame, text="20 Top rated places", anchor=W, bg=FRAME_BG, font=("Arial", 15)).pack(fill=X)
+        top_rated_view=TopRatedView(top_rated_frame,db_manager)
         top_rated_results,err=db_manager.getHighestRatedLocations()
         for result in top_rated_results:
             top_rated_view.insert_row(result)
 
         # Create age frame
         avg_age_frame = Frame(self, bg=FRAME_BG, bd=10)
-        # avg_age_frame.pack_propagate(0)
-        avg_age_frame.place(relx=0.75, rely=0, relwidth=0.25, relheight=1)
+        avg_age_label = Label(avg_age_frame, text="Average age for each trip type and season", anchor=W, bg=FRAME_BG, font=("Arial", 15)).pack(fill=X)
+        avg_age_frame.place(relx=0.7, rely=0, relwidth=0.3, relheight=1)
         avg_age_view=AvgAgeView(avg_age_frame)
         avg_age_results,err=db_manager.getGlobalStatistics()
         for result in avg_age_results:
@@ -52,8 +54,9 @@ class AvgAgeView(ttk.Treeview):
 
 
 class TopRatedView(ttk.Treeview):
-    def __init__(self, containing_frame):
+    def __init__(self, containing_frame,db_manager):
         ttk.Treeview.__init__(self, containing_frame, selectmode='browse')
+        self.db_manager=db_manager
         self['show'] = 'headings'
         self["columns"] = ("1", "2", "3", "4", "5", "6", "7", "8")
         self.column("#0", width=0, minwidth=0, stretch=YES)
@@ -75,6 +78,8 @@ class TopRatedView(ttk.Treeview):
         self.heading("7", text="Country", anchor=W)
         self.heading("8", text="Rating", anchor=W)
 
+        self.bind("<Double-1>", self.location_double_click)
+
         self.pack(expand=True, fill=BOTH)
 
     def insert_row(self, row_values):
@@ -82,3 +87,8 @@ class TopRatedView(ttk.Treeview):
 
     def clear_table(self):
         self.delete(*self.get_children())
+
+    def location_double_click(self, event):
+        selected = self.selection()[0]
+        location = self.item(selected)["values"]
+        LocationWindow(location, self.db_manager)

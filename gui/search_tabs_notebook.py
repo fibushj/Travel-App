@@ -37,7 +37,7 @@ class SearchTabsNotebook(ttk.Notebook):
 
         self.country_f_code_frame = Frame(class_search_tab, name="country_f_code_frame", bg=FRAME_BG, bd=3)
         self.country_f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(self.country_f_code_frame, text="Sub category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_code_label = Label(self.country_f_code_frame, text="Sub Category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_code_list_items = ["Please choose category first!"]
         self.country_f_code_filter_list = self.create_filter_list(self.country_f_code_frame, f_code_list_items)
 
@@ -95,7 +95,7 @@ class SearchTabsNotebook(ttk.Notebook):
 
         self.radius_f_code_frame = Frame(radius_search_tab, bg=FRAME_BG, bd=3)
         self.radius_f_code_frame.pack(expand=True, fill=X)
-        f_code_label = Label(self.radius_f_code_frame, text="Sub category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
+        f_code_label = Label(self.radius_f_code_frame, text="Sub Category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_code_list_items = ["Please choose category first!"]
         self.radius_f_code_filter_list = self.create_filter_list(self.radius_f_code_frame, f_code_list_items)
 
