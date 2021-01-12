@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from ttkwidgets import TickScale
 
 from gui.consts import FRAME_BG
@@ -26,12 +26,16 @@ class SearchTabsNotebook(ttk.Notebook):
         country_frame.pack(expand=True, fill=X)
         country_label = Label(country_frame, text="Country:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         country_list_items, err = self.db_manager.fetchCountries()
+        if(country_list_items is None):
+            messagebox.showinfo("Error", err)
         self.country_country_filter_list = self.create_filter_list(country_frame, country_list_items)
 
         f_class_frame = Frame(class_search_tab, bg=FRAME_BG, bd=3)
         f_class_frame.pack(expand=True, fill=X)
         f_class_label = Label(f_class_frame, text="Category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_class_list_items, err = self.db_manager.fetchFeatureClasses()
+        if(f_class_list_items is None):
+            messagebox.showinfo("Error", err)
         f_class_list_items.insert(0, "")
         self.country_f_class_filter_list = self.create_country_f_class_filter_list(f_class_frame, f_class_list_items)
 
@@ -46,7 +50,11 @@ class SearchTabsNotebook(ttk.Notebook):
         self.country_trip_type_val = StringVar()
         self.country_trip_season_val = StringVar()
         trip_type_options, err = self.db_manager.fetchTripTypes()
+        if(trip_type_options is None):
+            messagebox.showinfo("Error", err)
         trip_season_options, err = self.db_manager.fetchTripSeasons()
+        if(trip_season_options is None):
+            messagebox.showinfo("Error", err)
         trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.country_trip_type_val, "Trip type", "All", *trip_type_options,
                                             command=lambda selection: self.country_trip_type_val.set(selection))
         trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.country_trip_season_val, "Trip season", "All", *trip_season_options,
@@ -90,6 +98,8 @@ class SearchTabsNotebook(ttk.Notebook):
         f_class_frame.pack(expand=True, fill=X)
         f_class_label = Label(f_class_frame, text="Category:", anchor=W, bg=FRAME_BG).pack(expand=True, fill=X)
         f_class_list_items, err = self.db_manager.fetchFeatureClasses()
+        if(f_class_list_items is None):
+            messagebox.showinfo("Error", err)
         f_class_list_items.insert(0, "")
         self.radius_f_class_filter_list = self.create_radius_f_class_filter_list(f_class_frame, f_class_list_items)
 
@@ -104,7 +114,11 @@ class SearchTabsNotebook(ttk.Notebook):
         self.radius_trip_type_val = StringVar()
         self.radius_trip_season_val = StringVar()
         trip_type_options, err = self.db_manager.fetchTripTypes()
+        if(trip_type_options is None):
+            messagebox.showinfo("Error", err)
         trip_season_options, err = self.db_manager.fetchTripSeasons()
+        if(trip_season_options is None):
+            messagebox.showinfo("Error", err)
         trip_type_dropmenu = ttk.OptionMenu(trip_frame, self.radius_trip_type_val, "Trip type", "All", *trip_type_options,
                                             command=lambda selection: self.radius_trip_type_val.set(selection))
         trip_season_dropmenu = ttk.OptionMenu(trip_frame, self.radius_trip_season_val, "Trip season", "All", *trip_season_options,
@@ -146,6 +160,8 @@ class SearchTabsNotebook(ttk.Notebook):
                 filter_list.set_entry_text(item)
                 # fill list using query for all feature codes full name that match the selected feature class
                 matching_f_code_list_items, err = self.db_manager.fetchFeatureCodes(item)
+                if (matching_f_code_list_items is None):
+                    messagebox.showinfo("Error", err)
                 matching_f_code_list_items.insert(0, "")
                 self.country_f_code_filter_list.destroy()
                 self.country_f_code_filter_list = self.create_filter_list(self.country_f_code_frame, matching_f_code_list_items)
@@ -166,6 +182,8 @@ class SearchTabsNotebook(ttk.Notebook):
                 filter_list.set_entry_text(item)
                 # fill list using query for all feature codes full name that match the selected feature class
                 matching_f_code_list_items, err = self.db_manager.fetchFeatureCodes(item)
+                if (matching_f_code_list_items is None):
+                    messagebox.showinfo("Error", err)
                 matching_f_code_list_items.insert(0, "")
                 self.radius_f_code_filter_list.destroy()
                 self.radius_f_code_filter_list = self.create_filter_list(self.radius_f_code_frame,

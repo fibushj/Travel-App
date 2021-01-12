@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from gui.consts import FRAME_BG, WIDTH, HEIGHT
 from gui.location_window import LocationWindow
@@ -17,6 +17,8 @@ class StatisticsWindow(Toplevel):
         top_rated_label = Label(top_rated_frame, text="20 Top rated places", anchor=W, bg=FRAME_BG, font=("Arial", 15)).pack(fill=X)
         top_rated_view=TopRatedView(top_rated_frame,db_manager)
         top_rated_results,err=db_manager.getHighestRatedLocations()
+        if (top_rated_results is None):
+            messagebox.showinfo("Error", err)
         for result in top_rated_results:
             top_rated_view.insert_row(result)
 
@@ -26,6 +28,8 @@ class StatisticsWindow(Toplevel):
         avg_age_frame.place(relx=0.7, rely=0, relwidth=0.3, relheight=1)
         avg_age_view=AvgAgeView(avg_age_frame)
         avg_age_results,err=db_manager.getGlobalStatistics()
+        if (avg_age_results is None):
+            messagebox.showinfo("Error", err)
         for result in avg_age_results:
             avg_age_view.insert_row(result)
 

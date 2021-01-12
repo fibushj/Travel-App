@@ -16,6 +16,9 @@ class ProfileWindow(Toplevel):
             expand=True, fill=X)
 
         user_reviews, err = db_manager.getCurrentUserReviews()
+        if(user_reviews is None):
+            messagebox.showinfo("Error", err)
+            return
         for review in user_reviews:
             place_id = review[1]
             trip_season = review[4]
