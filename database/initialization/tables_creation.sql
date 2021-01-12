@@ -18,11 +18,10 @@ CREATE TABLE feature_code(
 CREATE TABLE location (
     id INT PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
-    coordinates POINT NOT NULL,
+    lat DECIMAL( 10, 8 ) NOT NULL,
+    lng DECIMAL( 11, 8 ) NOT NULL,
     feature_code VARCHAR(5),
-    country_code CHAR(2) NOT NULL,
-    elevation INT,
-    population BIGINT UNSIGNED
+    country_code CHAR(2) NOT NULL
 );
 
 CREATE TABLE user(

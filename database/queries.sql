@@ -1,3 +1,6 @@
+-- expermination file, ignore it
+
+
 UPDATE trip_type 
 SET 
     name = CONCAT(UPPER(LEFT(name, 1)),

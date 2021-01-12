@@ -1,4 +1,0 @@
-run the foreign keys code (talk to me - Jonathan - before doing it, I'll explain something)
-
-run following command to invert lat-lon:
-update location set coordinates=POINT(ST_Y(coordinates), ST_X(coordinates));
