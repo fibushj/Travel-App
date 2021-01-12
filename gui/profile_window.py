@@ -15,13 +15,13 @@ class ProfileWindow(Toplevel):
         reviews_label = Label(scrollable_frame, text="Reviews:", anchor=W, bg=FRAME_BG, font=("Arial", 18)).pack(
             expand=True, fill=X)
 
-        user_reviews, err = db_manager.getCurrentUserReviews(limit=50)
+        user_reviews, err = db_manager.getCurrentUserReviews()
         for review in user_reviews:
             place_id = review[1]
             trip_season = review[4]
             review_frame = create_review_box(containing_frame=scrollable_frame, location_name=review[0],
                                              reviewer_name="Me", rating=review[2], trip_type=review[3],
-                                             trip_season=trip_season, reviewer_age="", review_text=review[6])
+                                             trip_season=trip_season, reviewer_age=None, review_text=review[6])
 
             def delete_handler(_delete_button, _review_frame, _place_id, _trip_season):
                 isSuc, err = db_manager.deleteCurrentUserReview(_place_id, _trip_season)

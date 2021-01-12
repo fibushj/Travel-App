@@ -40,16 +40,22 @@ def create_review_box(containing_frame, location_name, reviewer_name, rating, tr
 
     text.tag_configure("sender", font="Arial 15 bold")
     text.tag_configure("age", font="Arial 10")
+    text.tag_configure("on", font="Arial 15")
     text.tag_configure("trip_type", font="Arial 10")
-    text.tag_configure("trip_season", font="Arial 8")
-    text.tag_configure("rating", font="Arial 8")
-    text.tag_configure("message", font=("Helvetica", "13"), lmargin1=15, lmargin2=15)
+    text.tag_configure("trip_season", font="Arial 10")
+    text.tag_configure("rating", font="Arial 15")
+    text.tag_configure("message", font=("Helvetica", "13"), lmargin1=10, lmargin2=10)
 
-    text.insert("end", reviewer_name.title() + ' ', "sender")
-    text.insert("end", str(reviewer_age) + '\n', 'age')
-    text.insert("end", trip_type + '\n', 'trip_type')
-    text.insert("end", trip_season + '\n', 'trip_season')
-    text.insert("end", str(rating) + '\n', 'rating')
+    text.insert("end", reviewer_name.title(), "sender")
+    if reviewer_age:
+        text.insert("end", ' ('+str(reviewer_age)+' y/o)', 'age')
+    if location_name:
+        text.insert("end", " on ", "on")
+        text.insert("end", location_name , "sender")
     text.insert("end", '\n')
-    text.insert("end", review_text + '\n\n', 'message')
+    text.insert("end", "Rating: "+str(rating) + '\n', 'rating')
+    text.insert("end", trip_type + ', ', 'trip_type')
+    text.insert("end", trip_season + '\n', 'trip_season')
+    text.insert("end", '\n')
+    text.insert("end", review_text + '\n', 'message')
     return frame
