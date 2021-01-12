@@ -31,7 +31,7 @@ class LocationsView(ttk.Treeview):
 
         self.bind("<Double-1>", self.location_double_click)
 
-        self.load_more_button = Button(self.containing_frame, text="Click here to load more", width=20, command=self.load_more)
+        self.load_more_button = Button(self.containing_frame, text="Load 50 more", width=20, command=self.load_more)
         self.load_more_button.pack(side="bottom", pady=(15, 5))
 
         scrollbar = ttk.Scrollbar(self.containing_frame, orient="vertical", command=self.yview)
