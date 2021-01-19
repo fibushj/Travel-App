@@ -41,8 +41,9 @@ class LocationWindow(Toplevel):
         trip_season_dropmenu.pack(side="left", expand=True)
 
         is_anon_val = StringVar()
+        is_anon_val.set(0)
         ttk.Style().configure('TCheckbutton', background='white')  # define a style object for the scale widget
-        is_anon_checkbox = ttk.Checkbutton(parameters_frame, text='Anonymous', variable=is_anon_val, style='TCheckbutton')
+        is_anon_checkbox = ttk.Checkbutton(parameters_frame, text='Anonymous', variable=is_anon_val, onvalue=1, offvalue=0 ,style='TCheckbutton')
         is_anon_checkbox.pack(side="left", expand=True)
 
         rating_frame = Frame(parameters_frame, bg='white', bd=3)
